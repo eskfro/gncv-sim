@@ -1,5 +1,5 @@
 .PHONY: twod
 
-2d:
+2:
 	chmod +x build/sim2d
 	./build/sim2d 

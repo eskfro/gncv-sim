@@ -1,5 +1,25 @@
 #pragma once
-
+// ============================================================================
+// Actuator Symbols (Fossen)
+// ============================================================================
+//
+//   delta   : rudder angle                         [rad]
+//   n       : propeller shaft speed                [rev/s]
+//   T       : propeller thrust                     [N]
+//   Q       : propeller torque                     [Nm]
+//   J       : advance ratio, J = u_a / (n*D)       [-]
+//   K_T(J)  : thrust coefficient                   [-]
+//   K_Q(J)  : torque coefficient                   [-]
+//   D       : propeller diameter                   [m]
+//   u_a     : advance speed (inflow at propeller)  [m/s]
+//   rho     : water density                        [kg/m^3]
+//
+//   T = rho * D^4 * K_T(J) * n*|n|
+//   Q = rho * D^5 * K_Q(J) * n*|n|
+//
+//   tau     : generalized force/moment from an actuator, mapped to
+//             vessel reference point via lever arm (moment = r x F)
+// ============================================================================
 #include "common.hpp"
 #include <armadillo>
 #include <stdlib.h>

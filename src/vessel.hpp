@@ -1,13 +1,45 @@
 #pragma once
-
+// ============================================================================
+// 6-DOF Marine Craft Dynamics (Fossen)
+// ============================================================================
+//
+// Equations of motion:
+//
+//   Kinematics:   eta_dot = J(eta) * nu
+//
+//   Kinetics:     M * nu_dot + C(nu) * nu + D(nu) * nu + g(eta) = tau
+//
+// where:
+//
+//   eta = [x, y, z, phi, theta, psi]^T   : position/orientation (NED frame)
+//   nu  = [u, v, w, p, q, r]^T           : linear/angular velocity (body frame)
+//   tau = [X, Y, Z, K, M, N]^T           : generalized forces/moments (body frame)
+//
+//   M     = M_RB + M_A                   : total mass/inertia matrix
+//   C(nu) = C_RB(nu) + C_A(nu)           : total Coriolis-centripetal matrix
+//   D(nu) = D_L + D_NL(nu)               : total damping matrix
+//   g(eta)                               : restoring forces/moments (gravity + buoyancy)
+//   J(eta)                               : kinematic transform, body -> NED
+//
+// Rearranged for integration:
+//
+//   nu_dot  = M^-1 * (tau - C(nu)*nu - D(nu)*nu - g(eta))
+//   eta_dot = J(eta) * nu
+//
+// Reference:
+//   T.I. Fossen, "Handbook of Marine Craft Hydrodynamics and Motion Control",
+//   Wiley, 2011.
+// ===========================================================================
 #include "actuator.hpp"
 #include "common.hpp"
+#include "guidance.hpp"
 
 #include <stdlib.h>
 #include <string>
 #include <armadillo>
 #include <vector>
 
+namespace vessel {
 /*
 Dynamics of the vessel
 */
@@ -18,7 +50,7 @@ public:
     void Step(double dt);
 
     // Forces from the vessel fed into dynamics 
-    void SetExternalForces(double external_forces);
+    void SetTau(arma::vec6 tau);
 
     const common::Eta& Eta() { return eta_; }
     const common::Nu& Nu() { return nu_; }
@@ -28,7 +60,6 @@ private:
     common::Eta eta_{};
     common::Nu nu_{};
     
-    // Physical stuff
     double length_{};
     double width_{};
     arma::vec3 cg_;         // centre of gravity
@@ -65,16 +96,23 @@ public:
 
     void Step(double dt);
 
+    void CalculateForces();             // Wind, hydrodynamics, actuators
+    
+    arma::vec6 Tau() { return tau_; }
+
 private:
     std::string_view name_{"MyVessel"};
 
-    common::Eta eta_c_{};
-    common::Nu nu_c_{};
+    common::Reference reference_{};
+    arma::vec6 tau_{};
 
     Dynamics dynamics_{};
+    guidance::Guidance guidance_{};
 
     // Actuators
     std::vector<actuators::Rudder> rudders_{};
     std::vector<actuators::MainPropulsion> main_propulsors_{};
     std::vector<actuators::TunnelThruster> tunnel_thrusters_{};
 };
+
+} // namespace vessel
