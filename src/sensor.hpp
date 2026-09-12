@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common.hpp"
+#include <armadillo>
 
 namespace sensor {
 
@@ -18,11 +19,11 @@ public:
     GnssRx() = default;
     void Step(double dt);
 
-    common::Vec3 Position();
+    arma::vec3& Position() { return position_; }
 
 private:
     bool add_noise_{true};
-    common::Vec3 position_{};
+    arma::vec3 position_{};
 
 };
 

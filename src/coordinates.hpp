@@ -6,6 +6,7 @@
 This might be unecessary we will see
 */
 
+/*
 class Body {
 public:
     double X() { return point_.X(); }
@@ -35,4 +36,5 @@ public:
 private:
     common::Vec3 point_;
 
-};  
+};
+*/
