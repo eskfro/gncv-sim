@@ -28,7 +28,7 @@
 
 namespace actuators {
 
-class MainPropulsion {
+class SimulatedMainPropulsion {
 public:
     void Step(double dt);
 
@@ -39,12 +39,13 @@ public:
     const double& RpmCommand() const { return rpm_command_; }
     const double& MaxRpm() const { return max_rpm_; }
     const double& MinRpm() const { return min_rpm_; }
-    const arma::vec3& Position() const { return position_; } 
+    const arma::vec3& Position() const { return position_; }
+    const arma::vec6& ThrusVector() const  { return thrust_vector_; }
 
 private:
     std::string_view name_{"MyMainPropulsor"};
     arma::vec3 position_{};
-    arma::vec3 force_vector_{};     // Body fixed force vector
+    arma::vec6 thrust_vector_{};     // (1, 0, 0, 0, 0, -l_yi)
 
     double time_constant_{3.0};
     double max_rpm_{600};
@@ -56,7 +57,7 @@ private:
     double rpm_command_{};
 };
 
-class Rudder {
+class SimulatedRudder {
 public:
     // Simulated rudder dynamics
     void Step(double dt);
@@ -71,6 +72,7 @@ public:
 private:
     std::string_view name_ = "MyRudder";
     arma::vec3 position_{};
+    arma::vec6 thrust_vector_{};        //(0, 1, 0, -l_zi, 0, l_xi) 
     
     // Dynamics
     double time_constant_{1.0};
@@ -85,7 +87,7 @@ private:
     double angle_command_{};    // delta_c
 }; 
 
-class TunnelThruster {
+class SimulatedTunnelThruster {
 public:
     void Step(double dt);
 
@@ -101,7 +103,7 @@ public:
 private:
     std::string_view name_{"MyTunnelThruster"};
     arma::vec3 position_{};
-    arma::vec3 force_vector_{};     // Body fixed force vector
+    arma::vec3 thrust_vector_{};        //(0, 1, 0, -l_zi, 0, l_xi) 
 
     double time_constant_{1.0};
     double max_rpm_{1000};

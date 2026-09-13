@@ -30,60 +30,18 @@
 //   T.I. Fossen, "Handbook of Marine Craft Hydrodynamics and Motion Control",
 //   Wiley, 2011.
 // ===========================================================================
-#include "actuator.hpp"
-#include "common.hpp"
-#include "guidance.hpp"
-
 #include <stdlib.h>
 #include <string>
 #include <armadillo>
 #include <vector>
 
+#include "actuator_io.hpp"
+#include "common.hpp"
+#include "guidance.hpp"
+#include "dynamics.hpp"
+#include "controller.hpp"
+
 namespace vessel {
-/*
-Dynamics of the vessel
-*/
-class Dynamics {
-public: 
-    Dynamics() = default;
-
-    void Step(double dt);
-
-    // Forces from the vessel fed into dynamics 
-    void SetTau(arma::vec6 tau);
-
-    const common::Eta& Eta() { return eta_; }
-    const common::Nu& Nu() { return nu_; }
-
-private:
-    // Coordinates
-    common::Eta eta_{};
-    common::Nu nu_{};
-    
-    double length_{};
-    double width_{};
-    arma::vec3 cg_;         // centre of gravity
-    arma::vec3 cb_;         // centre of boyancy
-
-    // Dynamics
-    arma::mat66 m_rb_{};    // M_RB     : rigid body (mass and intertia tensor)
-    arma::mat66 m_a_{};     // M_A      : added mass (hydrodynamics)
-    arma::mat66 m_{};       // M        : total mass
-
-    arma::mat66 d_l_{};     // D        : linear damping
-    arma::mat66 d_n_{};     // D_n(v)   : nonlinear damping
-    arma::mat66 d_{};       // D(v)     : total damping, D + D_n(v)
-
-    arma::mat66 c_rb_{};    // C_RB(v)  : coriolis rigid body
-    arma::mat66 c_a_{};     // C_A(v)   : coriolis added mass centripetal
-    arma::mat66 c_{};       // C(v)     : total coriolos, C_RB(v) + C_A(v)
-
-    arma::vec6 g_{};        // g(eta)   : restoring forces
-    arma::mat66 g_l_{};     // G        : linearized restoring forces
-
-    arma::mat66 j_{};       // J(eta)   : kinematic transform
-
-};
 
 /*
 Vessel IO
@@ -96,23 +54,37 @@ public:
 
     void Step(double dt);
 
-    void CalculateForces();             // Wind, hydrodynamics, actuators
+    void CalculateForces(); // tau = tau_wind + tau_wave + tau_hyd + tau_hs + tau_control
+    void SetActuatorCommands();
     
     arma::vec6 Tau() { return tau_; }
 
 private:
     std::string_view name_{"MyVessel"};
 
-    common::Reference reference_{};
-    arma::vec6 tau_{};
+    double course_angle_{}; // = yaw + crab_angle
+    double crab_angle_{}; // = atan(v/u) = sin-1(v/U)
+    double attack_angle_{}; // = atan(wr/ur)
+    double sideslip_angle_{}; // = sin-1(vr/Ur)
 
+    arma::vec6 tau_{};
     Dynamics dynamics_{};
+
     guidance::Guidance guidance_{};
+    common::Reference reference_{};
+    controller::Controller controller_{};
 
     // Actuators
-    std::vector<actuators::Rudder> rudders_{};
-    std::vector<actuators::MainPropulsion> main_propulsors_{};
-    std::vector<actuators::TunnelThruster> tunnel_thrusters_{};
+    common::ActuatorCommands actuator_commands_{};
+    std::vector<actuators_io::Rudder> rudders_{};
+    std::vector<actuators_io::MainPropulsion> main_propulsors_{};
+    std::vector<actuators_io::TunnelThruster> tunnel_thrusters_{};
 };
 
+/*
+TODO
+
+Thrust matrix
+
+*/
 } // namespace vessel

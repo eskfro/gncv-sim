@@ -39,10 +39,6 @@ private:
     arma::vec6 vector_{};
 };
 
-double deg2rad(double deg);
-bool inrange(double value, double range_min, double range_max);
-double ssa(); // TODO
-
 enum class GuidanceMode : uint8_t {HeadingHold, PositionHold, WaypointTracking};
 
 struct Reference {
@@ -57,5 +53,12 @@ struct ActuatorCommands {
     double n;       // rpm main propulsor
     double n_tt;    // rpm tunnel thruster
 };
+
+double deg2rad(double deg);
+bool inrange(double value, double range_min, double range_max);
+double ssa(double angle);
+arma::mat33 Smtrx(const arma::vec3& a);
+arma::mat33 Rzyx(const arma::vec3& a);
+arma::mat66 J(const Eta& eta);
 
 } // namespace common

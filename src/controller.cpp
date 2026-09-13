@@ -11,14 +11,14 @@ Output:
 
 namespace controller {
 
-void Controller::CalculateCommands(common::Reference reference, common::Eta eta, common::Nu nu) {
+void Controller::CalculateActuatorCommands(common::Reference reference, common::Eta eta, common::Nu nu) {
     const double psi = eta.Psi();
     double psi_e = reference.psi_d - psi;
 
     switch (reference.guidance_mode) {
 
     case common::GuidanceMode::HeadingHold:
-        commands_.delta = 2 * psi_e;
+        actuator_commands_.delta = 2 * psi_e;
         break;
 
     default:

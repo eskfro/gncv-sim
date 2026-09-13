@@ -6,12 +6,12 @@ namespace controller {
 
 class Controller {
 public:
-    void CalculateCommands(common::Reference reference, common::Eta eta, common::Nu nu);    
+    void CalculateActuatorCommands(common::Reference reference, common::Eta eta, common::Nu nu);    
 
-    common::ActuatorCommands Commands() { return commands_; }
+    common::ActuatorCommands ActuatorCommands() { return actuator_commands_; }
 
 private:
-    common::ActuatorCommands commands_{};
+    common::ActuatorCommands actuator_commands_{};
 };
 
 } // namespace controller
