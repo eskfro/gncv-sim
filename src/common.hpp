@@ -54,6 +54,15 @@ struct ActuatorCommands {
     double n_tt;    // rpm tunnel thruster
 };
 
+struct ImuSnapshot {
+    double ax;      // accelerations 
+    double ay;
+    double az;
+    double p;       // angular rates in body frame
+    double q;
+    double r;
+};
+
 double deg2rad(double deg);
 bool inrange(double value, double range_min, double range_max);
 double ssa(double angle);
