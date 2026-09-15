@@ -132,8 +132,8 @@ arma::mat33 T_zyx(const arma::vec3& a) {
 // J(eta) : kinematic transformation matrix
 // Transforms the body frame linear/angular velocities (nu) into 
 // ned framed position rates and euler angle rates (eta_dot)
-arma::mat66 J(const common::Eta& eta) {
-    const arma::vec3 attitude = eta.Attitude(); // (phi, theta, psi)
+arma::mat66 J(const arma::vec6& eta) {
+    const arma::vec3 attitude = eta.subvec(3, 5); // (phi, theta, psi)
     arma::mat66 J(arma::fill::zeros);
     J.submat(0, 0, 2, 2) = R_zyx(attitude);
     J.submat(3, 3, 5, 5) = T_zyx(attitude);
@@ -156,8 +156,8 @@ arma::mat66 M_rb(double m, const arma::mat33& I0, const arma::vec3& r_cg) {
 }
 
 // Corelois rigid body
-arma::mat66 C_rb(double m, const arma::mat33& I0, const arma::vec3& r_cg, const Nu& nu) {
-    const arma::vec3 nu2 = nu.AttitudeRate();
+arma::mat66 C_rb(double m, const arma::mat33& I0, const arma::vec3& r_cg, const arma::vec6& nu) {
+    const arma::vec3 nu2 = nu.subvec(3, 5);
     const arma::mat33 C11 = m * S(nu2);
     const arma::mat33 C12 = -m * S(nu2) * S(r_cg);
     const arma::mat33 C21 = m * S(r_cg) * S(nu2);
@@ -168,9 +168,9 @@ arma::mat66 C_rb(double m, const arma::mat33& I0, const arma::vec3& r_cg, const 
 
 // Boyancy force (nonlinear)
 arma::vec6 g(double w, double b, const arma::vec3& r_cg,
-    const arma::vec3& r_cb, const common::Eta& eta) {
-    const double phi = eta.Attitude()(0);
-    const double theta = eta.Attitude()(1);
+    const arma::vec3& r_cb, const arma::vec6& eta) {
+    const double phi = eta(3);
+    const double theta = eta(4);
     const double xg = r_cg(0); 
     const double yg = r_cg(1); 
     const double zg = r_cg(2);
@@ -207,10 +207,10 @@ vec12 solver_12d_rk4(std::function<vec12(vec12, double)> f, vec12 x, double t, d
 
 // D_n(nu): nonlinear (quadratic) damping matrix, diagonal-only simplification
 // coeffs = [X_u|u|, Y_v|v|, Z_w|w|, K_p|p|, M_q|q|, N_r|r|]  (negative values, from ship data)
-arma::mat66 D_n(const arma::vec6& coeffs, const Nu& nu) {
+arma::mat66 D_n(const arma::vec6& coeffs, const arma::vec6& nu) {
     arma::vec6 diag_terms;
     for (int i = 0; i < 6; ++i) {
-        diag_terms(i) = -coeffs(i) * std::abs(nu.Vector()(i));
+        diag_terms(i) = -coeffs(i) * std::abs(nu(i));
     }
     return arma::diagmat(diag_terms);
 }
