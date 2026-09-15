@@ -18,7 +18,24 @@ bool inrange(double value, double range_min, double range_max) {
     return range_min < value && value < range_max;
 }
 
-arma::mat33 Smtrx(const arma::vec3& a) {
+// Smallest signed angle [rad]
+// Maps angle to range (-pi, pi)
+double ssa(double angle) {
+    double wrapped = std::fmod(angle + M_PI, 2 * M_PI);
+    if (wrapped < 0.0) wrapped += 2 * M_PI;
+    return wrapped - M_PI;
+}
+
+arma::mat66 join_blocks(arma::mat33 A, arma::mat33 B, arma::mat33 C, arma::mat33 D) {
+    return arma::join_cols(
+        arma::join_rows(A, B),
+        arma::join_rows(C, D)
+    );
+}
+
+// Cross product matrix
+// S(a)b = a x b
+arma::mat33 S_mat(const arma::vec3& a) {
     return arma::mat33{
         {  0.0,   -a(2),   a(1) },
         {  a(2),   0.0,   -a(0) },
@@ -26,9 +43,56 @@ arma::mat33 Smtrx(const arma::vec3& a) {
     };
 }
 
+// Spring stiffness matrix G about P for a floating vessel
+// This is a linearized version of a nonlinear system, 
+// but it works well for small roll and pitch angles.
+// Reference: Gmtrx.m (MSS, Thor I. Fossen)
+arma::mat66 G_mat(
+    double nabla,       // volume displacement
+    double A_wp,        // area waterplane
+    double gmt,         // transverse metacentric height [m]
+    double gml,         // longitudunal metacentric height [m]
+    double x_cf,        // vector from co to cf (centre flotation)
+    arma::vec3 r_p      // vector from co to P
+) {
+    int rho = 1025;     // water density
+    double g = 9.81;
+
+    arma::vec3 r_cf = {x_cf, 0, 0};
+
+    double g33_cf = rho * g * A_wp;
+    double g44_cf = rho * g * nabla * gmt;
+    double g55_cf = rho * g * nabla * gml;
+
+    // G_cf
+    arma::vec6 d = {0, 0, g33_cf, g44_cf, g55_cf, 0};
+    arma::mat66 G_cf = arma::diagmat(d);
+
+    // G_co
+    // Transform it to co
+    arma::mat66 G_co = arma::trans(H_mat(r_cf)) * G_cf * H_mat(r_cf);
+    // Transform it to p
+    arma::mat66 G = arma::trans(H_mat(r_p)) * G_co * H_mat(r_p); 
+
+    return G;
+}
+
+// System transformation matrix
+// Generalized parallel-axis theorem
+// Reference: Hmtrx.m (MSS, Thor I. Fossen)
+arma::mat66 H_mat(const arma::vec3& r) {
+    const arma::mat33 S_r = S_mat(r);
+    const arma::mat33 H11 = arma::eye(3, 3);
+    const arma::mat33 H12 = arma::trans(S_r);
+    const arma::mat33 H21 = arma::zeros(3, 3);
+    const arma::mat33 H22 = arma::eye(3, 3);
+
+    return join_blocks(H11, H12, H21, H22);
+}
+
 // Rzyx: Euler angle rotation matrix R in SO(3), zyx convention
 // a = [phi, theta, psi]  (roll, pitch, yaw) [rad]
-arma::mat33 Rzyx(const arma::vec3& a) {
+arma::mat33 R_zyx(const arma::vec3& a) {
     const double phi   = a(0);
     const double theta = a(1);
     const double psi   = a(2);
@@ -49,7 +113,7 @@ arma::mat33 Rzyx(const arma::vec3& a) {
 
 // Tzyx: Euler angle rate transformation matrix, zyx convention
 // a = [phi, theta, psi]  (roll, pitch, yaw) [rad]
-arma::mat33 Tzyx(const arma::vec3& a) {
+arma::mat33 T_zyx(const arma::vec3& a) {
     const double phi   = a(0);
     const double theta = a(1);
 
@@ -70,21 +134,65 @@ arma::mat33 Tzyx(const arma::vec3& a) {
 // ned framed position rates and euler angle rates (eta_dot)
 arma::mat66 J(const common::Eta& eta) {
     const arma::vec3 attitude = eta.Attitude(); // (phi, theta, psi)
-
     arma::mat66 J(arma::fill::zeros);
-    J.submat(0, 0, 2, 2) = Rzyx(attitude);
-    J.submat(3, 3, 5, 5) = Tzyx(attitude);
+    J.submat(0, 0, 2, 2) = R_zyx(attitude);
+    J.submat(3, 3, 5, 5) = T_zyx(attitude);
     return J;
 }
 
-// [rad]
-// returns signed angle in range (-pi, pi)
-double ssa(double angle) {
-    double wrapped = std::fmod(angle + M_PI, 2 * M_PI);
-    if (wrapped < 0.0) {
-        wrapped += 2 * M_PI;
-    }
-    return wrapped - M_PI;
+// Inertia dyadic
+arma::mat33 I_cg(double m, double r44, double r55, double r66) {
+    return arma::diagmat(arma::vec3{{m*r44*r44, m*r55*r55, m*r66*r66}});
+}
+
+// Mass rigid body
+arma::mat66 M_rb(double m, const arma::mat33& I0, const arma::vec3& r_cg) {
+    const arma::mat33 M11 = m * arma::eye(3, 3);
+    const arma::mat33 M12 = -m * S_mat(r_cg);
+    const arma::mat33 M21 = m * S_mat(r_cg);
+    const arma::mat33 M22 = I0;
+
+    return join_blocks(M11, M12, M21, M22);
+}
+
+// Corelois rigid body
+arma::mat66 C_rb(double m, const arma::mat33& I0, const arma::vec3& r_cg, const Nu& nu) {
+    const arma::vec3 nu2 = nu.AttitudeRate();
+    const arma::mat33 C11 = m * S_mat(nu2);
+    const arma::mat33 C12 = -m * S_mat(nu2) * S_mat(r_cg);
+    const arma::mat33 C21 = m * S_mat(r_cg) * S_mat(nu2);
+    const arma::mat33 C22 = - S_mat(I0 * nu2);
+
+    return join_blocks(C11, C12, C21, C22);
+}
+
+// Boyancy force (nonlinear)
+arma::vec6 g(double w, double b, const arma::vec3& r_cg,
+    const arma::vec3& r_cb, const common::Eta& eta) {
+    const double phi = eta.Attitude()(0);
+    const double theta = eta.Attitude()(1);
+    const double xg = r_cg(0); 
+    const double yg = r_cg(1); 
+    const double zg = r_cg(2);
+    const double xb = r_cb(0);
+    const double yb = r_cb(1);
+    const double zb = r_cb(2);
+    
+    arma::vec6 g;
+    g(0) =  (w-b) * std::sin(theta);
+    g(1) = -(w-b) * std::cos(theta) * std::sin(phi);
+    g(2) = -(w-b) * std::cos(theta) * std::cos(phi);
+
+    g(3) = -(yg*w-yb*b) * std::cos(theta) * std::cos(phi) +
+            (zg*w-zb*b) * std::cos(theta) * std::sin(phi);
+
+    g(4) =  (zg*w-zb*b) * std::sin(theta) +
+            (xg*w-xb*b) * std::cos(theta) * std::cos(phi);
+
+    g(5) = -(xg*w-xb*b) * std::cos(theta) * std::sin(phi) +
+           -(yg*w-yb*b) * std::sin(theta);
+
+    return g;
 }
 
 } // namespace common

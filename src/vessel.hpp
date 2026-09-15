@@ -30,6 +30,7 @@
 //   T.I. Fossen, "Handbook of Marine Craft Hydrodynamics and Motion Control",
 //   Wiley, 2011.
 // ===========================================================================
+#include <memory>
 #include <stdlib.h>
 #include <string>
 #include <armadillo>
@@ -58,18 +59,22 @@ public:
     void SetActuatorCommands();
     
     arma::vec6 Tau() { return tau_; }
+    vessel::Dynamics* Dynamics() { return &dynamics_; }
 
 private:
     std::string_view name_{"MyVessel"};
 
-    double course_angle_{}; // = yaw + crab_angle
-    double crab_angle_{}; // = atan(v/u) = sin-1(v/U)
-    double attack_angle_{}; // = atan(wr/ur)
-    double sideslip_angle_{}; // = sin-1(vr/Ur)
+    // Angles
+    double course_angle_{}; // = yaw + crab_angle           X
+    double crab_angle_{}; // = atan(v/u) = sin-1(v/U)       Bc
+    double attack_angle_{}; // = atan(wr/ur)                a
+    double sideslip_angle_{}; // = sin-1(vr/Ur)             B
 
+    // Dynamics
     arma::vec6 tau_{};
-    Dynamics dynamics_{};
+    vessel::Dynamics dynamics_{};
 
+    // Modules ish
     guidance::Guidance guidance_{};
     common::Reference reference_{};
     controller::Controller controller_{};

@@ -30,8 +30,8 @@ private:
 class Nu { // ν
 public:
     void Reset() { vector_.fill(0.0); }
-    arma::vec3 PositionRate() { return vector_.subvec(0, 2); }
-    arma::vec3 AttitudeRate() { return vector_.subvec(3, 5); }
+    arma::vec3 PositionRate() const { return vector_.subvec(0, 2); }
+    arma::vec3 AttitudeRate() const { return vector_.subvec(3, 5); }
     const arma::vec6& Vector() const { return vector_; }
 private:
     // (0-2) : (u, v, w) : (surge velocity, sway velocity, heave velocity)
@@ -63,11 +63,30 @@ struct ImuSnapshot {
     double r;
 };
 
+// Utilities
 double deg2rad(double deg);
 bool inrange(double value, double range_min, double range_max);
 double ssa(double angle);
-arma::mat33 Smtrx(const arma::vec3& a);
-arma::mat33 Rzyx(const arma::vec3& a);
+arma::mat66 join_blocks(arma::mat33 A, arma::mat33 B, arma::mat33 C, arma::mat33 D);
+
+// Matrices
+arma::mat66 H_mat(const arma::vec3& r);
+arma::mat33 R_zyx(const arma::vec3& a);
+arma::mat33 S_mat(const arma::vec3& a);
+arma::mat33 T_zyx(const arma::vec3& a);
+arma::mat66 G_mat(
+    double nabla,
+    double A_wp,
+    double gmt, 
+    double gml,
+    double x_cf,
+    arma::vec3 r_p
+);
 arma::mat66 J(const Eta& eta);
+arma::mat33 I_cg(double m, double r44, double r55, double r66);
+arma::mat66 M_rb(double m, const arma::mat33& I0, const arma::vec3& r_cg);
+arma::mat66 C_rb(double m, const arma::mat33& I0, const arma::vec3& r_cg, const Nu& nu);
+arma::vec6 g(double w, double b, const arma::vec3& r_cg,
+    const arma::vec3& r_cb, const common::Eta& eta);
 
 } // namespace common

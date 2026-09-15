@@ -48,8 +48,8 @@ private:
     arma::mat66 C_a_{};     // C_A(v)   : coriolis added mass centripetal
     arma::mat66 C_{};       // C(v)     : total coriolos, C_RB(v) + C_A(v)
 
-    arma::vec6 g_{};        // g(eta)   : restoring forces
-    arma::mat66 G_l_{};     // G        : linearized restoring forces
+    arma::vec6 g_{};        // g(eta)   : restoring forces 
+    arma::mat66 G_{};       // G        : linearized restoring forces
 
     arma::mat66 J_{};       // J(eta)   : kinematic transform
 

@@ -32,7 +32,7 @@ void Dynamics::Init(std::filesystem::path vessel_config) {
     // ... first make the program work
 
     // Vessel params
-    const double m = 2000;                   // mass
+    const double m = 2000;                  // mass
     const double g = 9.81;                  // eple fra tre konstanten
     const double w = m * g;                 // weight
     const double b = w;                     // buoancy
@@ -43,26 +43,29 @@ void Dynamics::Init(std::filesystem::path vessel_config) {
     const double r66 = 10;                  // radius of gyration in yaw
 
     // Construct inertia dyadic in r_cg
-    const arma::mat33 I_cg = arma::diagmat(arma::vec3{{m*r44*r44, m*r55*r55, m*r66*r66}});               // Inertia about cg
+    const arma::mat33 I_cg = common::I_cg(m, r44, r55, r66); // Inertia about cg
 
     // Parallell axis theorem to construct inertia dyadic in r_co = 0
-    I0_ = I_cg - m * common::Smtrx(r_cg) * common::Smtrx(r_cg);
+    I0_ = I_cg - m * common::S_mat(r_cg) * common::S_mat(r_cg);
 
     // Construct M_rb
-    M_rb_.submat(0, 0, 2, 2) =  m * arma::eye(3, 3);
-    M_rb_.submat(0, 3, 2, 5) = -m * common::Smtrx(r_cg);
-    M_rb_.submat(3, 0, 5, 2) =  m * common::Smtrx(r_cg);
-    M_rb_.submat(3, 3, 5, 5) =  I0_;
+    M_rb_ = common::M_rb(m, I0_, r_cg);
 
     // Construct C_rb
-    const arma::vec3 nu2 = nu_.AttitudeRate(); 
-    C_rb_.submat(0, 0, 2, 2) =  m * common::Smtrx(nu2);
-    C_rb_.submat(0, 3, 2, 5) = -m * common::Smtrx(nu2) * common::Smtrx(r_cg);
-    C_rb_.submat(3, 0, 5, 2) =  m * common::Smtrx(r_cg) * common::Smtrx(nu2);
-    C_rb_.submat(3, 3, 5, 5) =  common::Smtrx(I0_ * nu2);
+    C_rb_ = common::C_rb(m, I0_, r_cg, nu_);
 
+    // Construct G
+    // We need g(eta) in the dynamics - not G ... 
+    double A_wp = 1000;                     // waterplane area
+    double nabla = 10000;                   // displacement
+    double gmt = 2;                         // transverse metacentric height
+    double gml = 8;                         // longitudinal metacentric heights
+    double lcf = -5;                        // location of the cf (centre floation) relatice to co
+    arma::vec3 r_p = {0, 0, 0};             // location of cp (?) relative to co  
+    G_ = common::G_mat(nabla, A_wp, gmt, gml, lcf, r_p);
 
-
+    // Bouyancy forces
+    g_ = common::g(w, b, r_cg, r_cb, eta_);
 }
 
 } // namespace vessel
