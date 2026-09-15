@@ -1,20 +1,24 @@
 #pragma once
 
 #include <armadillo>
+#include <functional>
 
 namespace common {
 
 // Probably dont need this
 enum class Frames : int {Body, Ned, Enu};
 
+// arma::vec12 equivalent
+using vec12 = arma::Col<double>::fixed<12>;
+
 // Eta = positions
 // Position and orientetion vector interface
 class Eta { // η
 public:
     void Reset() { vector_.fill(0.0); }
+    void SetVector(arma::vec6 vector) { vector_ = vector; }
 
     const double& Psi() const { return vector_.at(5); }
-
     arma::vec3 Position() const { return vector_.subvec(0, 2); }
     arma::vec3 Attitude() const { return vector_.subvec(3, 5); }
     const arma::vec6& Vector() const { return vector_; }
@@ -30,6 +34,8 @@ private:
 class Nu { // ν
 public:
     void Reset() { vector_.fill(0.0); }
+    void SetVector(arma::vec6 vector) { vector_ = vector; }
+
     arma::vec3 PositionRate() const { return vector_.subvec(0, 2); }
     arma::vec3 AttitudeRate() const { return vector_.subvec(3, 5); }
     const arma::vec6& Vector() const { return vector_; }
@@ -69,12 +75,15 @@ bool inrange(double value, double range_min, double range_max);
 double ssa(double angle);
 arma::mat66 join_blocks(arma::mat33 A, arma::mat33 B, arma::mat33 C, arma::mat33 D);
 
+// Numerical solvers
+vec12 solver_12d_rk4(std::function<vec12(vec12, double)> f, vec12 x, double t, double dt);
+
 // Matrices
-arma::mat66 H_mat(const arma::vec3& r);
 arma::mat33 R_zyx(const arma::vec3& a);
-arma::mat33 S_mat(const arma::vec3& a);
 arma::mat33 T_zyx(const arma::vec3& a);
-arma::mat66 G_mat(
+arma::mat66 H(const arma::vec3& r);
+arma::mat33 S(const arma::vec3& a);
+arma::mat66 G(
     double nabla,
     double A_wp,
     double gmt, 
@@ -88,5 +97,7 @@ arma::mat66 M_rb(double m, const arma::mat33& I0, const arma::vec3& r_cg);
 arma::mat66 C_rb(double m, const arma::mat33& I0, const arma::vec3& r_cg, const Nu& nu);
 arma::vec6 g(double w, double b, const arma::vec3& r_cg,
     const arma::vec3& r_cb, const common::Eta& eta);
+arma::mat66 D_n(const arma::vec6& coeffs, const Nu& nu);
+arma::mat66 D_l(const arma::vec6& coeffs);
 
 } // namespace common
