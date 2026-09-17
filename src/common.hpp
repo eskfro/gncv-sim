@@ -8,8 +8,10 @@ namespace common {
 // Probably dont need this
 enum class Frames : int {Body, Ned, Enu};
 
-// arma::vec12 equivalent
+// Custom vector and matrix definitionss
 using vec12 = arma::Col<double>::fixed<12>;
+using mat24 = arma::Mat<double>::fixed<2, 4>;
+using mat42 = arma::Mat<double>::fixed<4, 2>;
 
 // Eta = positions
 // Position and orientetion vector interface
@@ -73,7 +75,8 @@ struct ImuSnapshot {
 double deg2rad(double deg);
 bool inrange(double value, double range_min, double range_max);
 double ssa(double angle);
-arma::mat66 join_blocks(arma::mat33 A, arma::mat33 B, arma::mat33 C, arma::mat33 D);
+arma::mat66 join33blocks(arma::mat33 A, arma::mat33 B, arma::mat33 C, arma::mat33 D);
+arma::mat44 join22blocks(arma::mat33 A, arma::mat33 B, arma::mat33 C, arma::mat33 D);
 
 // Numerical solvers
 vec12 solver_12d_rk4(std::function<vec12(vec12, double)> f, vec12 x, double t, double dt);

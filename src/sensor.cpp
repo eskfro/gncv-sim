@@ -3,8 +3,16 @@
 
 namespace sensor {
 
-common::ImuSnapshot Imu::Snapshot() {
+common::ImuSnapshot SimulatedImu::Snapshot() {
     return {ax_, ay_, az_, p_, q_, r_};
+}
+
+void SimulatedGnssRx::SetAddNoise(bool add_noise) {
+    add_noise_ = add_noise;
+}
+
+void SimulatedImu::SetAddNoise(bool add_noise) {
+    add_noise_ = add_noise;
 }
 
 } // namespace sensor

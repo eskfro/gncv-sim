@@ -34,28 +34,20 @@ void Dynamics::Init(std::filesystem::path vessel_config) {
     x_.subvec(6, 11) = nu_.Vector();
 
     // Construct inertia dyadic in r_cg
-    const arma::mat33 I_cg = common::I_cg(p.m, p.r44, p.r55, p.r66); // Inertia about cg
-
-    // Parallell axis theorem to construct inertia dyadic in r_co = 0
+    const arma::mat33 I_cg = common::I_cg(p.m, p.r44, p.r55, p.r66);
     I_co_ = I_cg - p.m * common::S(p.r_cg) * common::S(p.r_cg);
 
     // Construct M_rb
     M_rb_ = common::M_rb(p.m, I_co_, p.r_cg);
 
-    // Construct C_rb
-    C_rb_ = common::C_rb(p.m, I_co_, p.r_cg, nu_.Vector());
-
-    // Construct G                      (G is to be used by controller but lets have it here anyways)
+    // Construct G 
     arma::vec3 r_p = {0, 0, 0};           
     G_ = common::G(p.nabla, p.area_wp, p.gmt, p.gml, p.lcf, r_p);
 
-    // Bouyancy forces
-    g_ = common::g(p.w, p.b, p.r_cg, p.r_cb, eta_.Vector());
-
     // Damping
     D_l_ = common::D_l(p.d_l_coeffs);
-    D_n_ = common::D_n(p.d_n_coeffs, nu_.Vector());
-    D_ = D_l_ + D_n_;
+
+    UpdateDynamicMatrices();
 }
 
 // Update the state dependent matrices

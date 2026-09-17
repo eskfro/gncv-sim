@@ -8,11 +8,14 @@ namespace sensor {
 /*
 Used by vessel to get x, y, z, coords
 */
-class GnssRx {
+class SimulatedGnssRx {
 public:
-    GnssRx() = default;
+    SimulatedGnssRx() = default;
     void Step(double dt);
 
+    void SetAddNoise(bool add_noise);
+
+    bool AddNoise() { return add_noise_; }
     arma::vec3& Position() { return position_; }
 
 private:
@@ -24,10 +27,14 @@ private:
 /*
 Returns the body fixed rates
 */
-class Imu {
+class SimulatedImu {
 public:
-    Imu() = default;
+    SimulatedImu() = default;
+    void Step(double dt);
 
+    void SetAddNoise(bool add_noise);
+
+    bool AddNoise() { return add_noise_; }
     common::ImuSnapshot Snapshot();
 
 private:
@@ -37,6 +44,7 @@ private:
     double p_;
     double q_;
     double r_;
+    bool add_noise_{false};
 };
 
 /*

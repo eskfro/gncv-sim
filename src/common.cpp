@@ -26,7 +26,14 @@ double ssa(double angle) {
     return wrapped - M_PI;
 }
 
-arma::mat66 join_blocks(arma::mat33 A, arma::mat33 B, arma::mat33 C, arma::mat33 D) {
+arma::mat66 join33blocks(arma::mat33 A, arma::mat33 B, arma::mat33 C, arma::mat33 D) {
+    return arma::join_cols(
+        arma::join_rows(A, B),
+        arma::join_rows(C, D)
+    );
+}
+
+arma::mat44 join22blocks(arma::mat22 A, arma::mat22 B, arma::mat22 C, arma::mat22 D) {
     return arma::join_cols(
         arma::join_rows(A, B),
         arma::join_rows(C, D)
@@ -87,7 +94,7 @@ arma::mat66 H(const arma::vec3& r) {
     const arma::mat33 H21 = arma::zeros(3, 3);
     const arma::mat33 H22 = arma::eye(3, 3);
 
-    return join_blocks(H11, H12, H21, H22);
+    return join33blocks(H11, H12, H21, H22);
 }
 
 // Rzyx: Euler angle rotation matrix R in SO(3), zyx convention
@@ -152,7 +159,7 @@ arma::mat66 M_rb(double m, const arma::mat33& I0, const arma::vec3& r_cg) {
     const arma::mat33 M21 = m * S(r_cg);
     const arma::mat33 M22 = I0;
 
-    return join_blocks(M11, M12, M21, M22);
+    return join33blocks(M11, M12, M21, M22);
 }
 
 // Corelois rigid body
@@ -163,7 +170,7 @@ arma::mat66 C_rb(double m, const arma::mat33& I0, const arma::vec3& r_cg, const 
     const arma::mat33 C21 = m * S(r_cg) * S(nu2);
     const arma::mat33 C22 = - S(I0 * nu2);
 
-    return join_blocks(C11, C12, C21, C22);
+    return join33blocks(C11, C12, C21, C22);
 }
 
 // Boyancy force (nonlinear)
