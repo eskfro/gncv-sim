@@ -41,6 +41,8 @@
 #include "guidance.hpp"
 #include "dynamics.hpp"
 #include "controller.hpp"
+#include "sensor_io.hpp"
+#include "thrust_allocator.hpp"
 
 namespace vessel {
 
@@ -78,12 +80,11 @@ private:
     guidance::Guidance guidance_{};
     common::Reference reference_{};
     controller::Controller controller_{};
+    allocator::ThrustAllocator thrust_allocator_{};
 
-    // Actuators
-    common::ActuatorCommands actuator_commands_{};
-    std::vector<actuators_io::Rudder> rudders_{};
-    std::vector<actuators_io::MainPropulsion> main_propulsors_{};
-    std::vector<actuators_io::TunnelThruster> tunnel_thrusters_{};
+    // Sensors
+    sensor_io::GnssRx gps_{};
+    sensor_io::Imu imu_{};
 };
 
 /*

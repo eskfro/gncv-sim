@@ -57,7 +57,7 @@ struct Reference {
 };
 
 struct ActuatorCommands {
-    double delta;   // rudder
+    double delta_r;   // rudder
     double n;       // rpm main propulsor
     double n_tt;    // rpm tunnel thruster
 };
@@ -80,6 +80,7 @@ arma::mat44 join22blocks(arma::mat33 A, arma::mat33 B, arma::mat33 C, arma::mat3
 
 // Numerical solvers
 vec12 solver_12d_rk4(std::function<vec12(vec12, double)> f, vec12 x, double t, double dt);
+double first_order_lowpass(double dt, double time_constant, double reference, double curr);
 
 // Matrices
 arma::mat33 R_zyx(const arma::vec3& a);

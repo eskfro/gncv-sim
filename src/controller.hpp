@@ -6,12 +6,12 @@ namespace controller {
 
 class Controller {
 public:
-    void CalculateActuatorCommands(common::Reference reference, common::Eta eta, common::Nu nu);    
+    void UpdateThrustReference(common::Reference reference, common::Eta eta, common::Nu nu);    
 
-    common::ActuatorCommands ActuatorCommands() { return actuator_commands_; }
+    const arma::vec3& ThrustVector() const { return thrust_reference_; }
 
 private:
-    common::ActuatorCommands actuator_commands_{};
+    arma::vec3 thrust_reference_{};
 };
 
 } // namespace controller
