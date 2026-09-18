@@ -32,29 +32,34 @@ class SimulatedMainPropulsion {
 public:
     void Step(double dt);
 
-    void SetRpmCommand(double rpm_command);
+    void SetRpmCommand(double n_c);
 
-    const double& Rpm() const { return rpm_; }
-    const double& RpmRate() const { return rpm_rate_; }
-    const double& RpmCommand() const { return rpm_command_; }
-    const double& MaxRpm() const { return max_rpm_; }
-    const double& MinRpm() const { return min_rpm_; }
-    const arma::vec3& Position() const { return position_; }
-    const arma::vec6& ThrusVector() const  { return thrust_vector_; }
+    const double& Rpm() const { return n_; }
+    const double& RpmRate() const { return n_rate_; }
+    const double& RpmCommand() const { return n_c_; }
+    const double& MaxRpm() const { return n_max_; }
+    const double& MinRpm() const { return n_min_; }
+
+    const arma::vec3& ThrustConfig() const  { return thrust_config_; }
+    const arma::vec6& Tau();
 
 private:
-    std::string_view name_{"MyMainPropulsor"};
-    arma::vec3 position_{};
-    arma::vec6 thrust_vector_{};     // (1, 0, 0, 0, 0, -l_yi)
+    // Things
+    std::string_view name_ = "MyMainPropulsor";
+    arma::vec3 thrust_config_ = {1, 0, 0};
 
     double time_constant_{3.0};
-    double max_rpm_{600};
-    double min_rpm_{-600};
+    double n_max_{600};
+    double n_min_{-600};
+
+    // Force
+    double k_mp_ = 1;
+    arma::vec6 tau_{};
 
     // State
-    double rpm_{};
-    double rpm_rate_{};
-    double rpm_command_{};
+    double n_{};
+    double n_rate_{};
+    double n_c_{};
 };
 
 class SimulatedRudder {
@@ -62,57 +67,70 @@ public:
     // Simulated rudder dynamics
     void Step(double dt);
 
-    void SetAngleCommand(double angle_command);
+    void SetAngleCommand(double delta_c);
 
-    const double& Area() const { return area_; }
-    const double& Angle() const { return angle_; }
-    const double& AngleRate() const { return angle_rate_; }
-    const double& AngleCommand() const { return angle_command_; };
+    const double& Angle() const { return delta_r_; }
+    const double& AngleRate() const { return delta_r_rate_; }
+    const double& AngleCommand() const { return delta_c_; };
+
+    const arma::vec3& ThrustConfig() const { return thrust_config_; }
+    const arma::vec6& Tau(double u);
 
 private:
+    // Things
     std::string_view name_ = "MyRudder";
-    arma::vec3 position_{};
-    arma::vec6 thrust_vector_{};        //(0, 1, 0, -l_zi, 0, l_xi) 
+    double l_x_ = -10;       
+    arma::vec3 thrust_config_ = {0, 1, l_x_}; 
     
     // Dynamics
     double time_constant_{1.0};
     double delta_max{common::deg2rad(35)};
     double delta_min{common::deg2rad(-35)};
-
-    double area_{};
+    
+    // Force
+    double k_r_ = 1;
+    arma::vec6 tau_;
 
     // State
-    double angle_{};            // delta_r
-    double angle_rate_{};
-    double angle_command_{};    // delta_c
+    double delta_r_{};           
+    double delta_r_rate_{};
+    double delta_c_{};
 }; 
 
 class SimulatedTunnelThruster {
 public:
     void Step(double dt);
 
-    void SetRpmCommand(double rpm_command);
+    void SetRpmCommand(double n_c);
 
-    const double& Rpm() const { return rpm_; }
-    const double& RpmRate() const { return rpm_rate_; }
-    const double& RpmCommand() const { return rpm_command_; }
-    const double& MaxRpm() const { return max_rpm_; }
-    const double& MinRpm() const { return min_rpm_; }
-    const arma::vec3& Position() const { return position_; } 
+    const double& Rpm() const { return n_; }
+    const double& RpmRate() const { return n_rate_; }
+    const double& RpmCommand() const { return n_c_; }
+    const double& MaxRpm() const { return n_max_; }
+    const double& MinRpm() const { return n_min_; }
+
+    const arma::vec3& ThrustConfig() const { return thrust_config_; }
+    const arma::vec6& Tau();
 
 private:
-    std::string_view name_{"MyTunnelThruster"};
-    arma::vec3 position_{};
-    arma::vec3 thrust_vector_{};        //(0, 1, 0, -l_zi, 0, l_xi) 
+    // Things
+    std::string_view name_ = "MyTunnelThruster";
+    double l_x_ = 10;
+    arma::vec3 thrust_config_ = {0, 1, l_x_};     
 
+    // Dynamics
     double time_constant_{1.0};
-    double max_rpm_{1000};
-    double min_rpm_{-1000};
+    double n_max_{1000};
+    double n_min_{-1000};
 
-    // State
-    double rpm_{};
-    double rpm_rate_{};
-    double rpm_command_{};
+    // Force
+    double k_tt_ = 1;
+    arma::vec6 tau_;
+
+    // Rpm state
+    double n_{};
+    double n_rate_{};
+    double n_c_{};
 };
 
 } // namespace actuators

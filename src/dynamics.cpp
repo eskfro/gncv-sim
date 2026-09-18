@@ -1,6 +1,7 @@
 #include "dynamics.hpp"
 #include "common.hpp"
 #include <armadillo>
+#include <cmath>
 #include <filesystem>
 
 /*
@@ -57,6 +58,13 @@ void Dynamics::UpdateDynamicMatrices() {
     g_ = common::g(p.w, p.b, p.r_cg, p.r_cb, eta_.Vector());
     D_n_ = common::D_n(p.d_n_coeffs, nu_.Vector());
     D_ = D_l_ + D_n_;
+}
+
+double Dynamics::U() {
+    arma::vec2 vec;
+    vec(0) = nu_.u();
+    vec(1) = nu_.v();
+    return arma::norm(vec, 2);
 }
 
 } // namespace vessel

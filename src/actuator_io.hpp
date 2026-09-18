@@ -39,14 +39,16 @@ class MainPropulsion {
 public:
     void Step(double dt) { main_propulsor_.Step(dt); }
 
-    void SetRpmCommand(double rpm_command) { main_propulsor_.SetRpmCommand(rpm_command); }
+    void SetRpmCommand(double n_c) { main_propulsor_.SetRpmCommand(n_c); }
 
     const double& Rpm() const { return main_propulsor_.Rpm(); }
     const double& RpmRate() const { return main_propulsor_.RpmRate(); }
     const double& RpmCommand() const { return main_propulsor_.RpmCommand(); }
     const double& MaxRpm() const { return main_propulsor_.MaxRpm(); }
     const double& MinRpm() const { return main_propulsor_.MinRpm(); }
-    const arma::vec3& Position() const { return main_propulsor_.Position(); } 
+
+    const arma::vec3& ThrustConfig() const { return main_propulsor_.ThrustConfig(); }
+    const arma::vec6& Tau() { return main_propulsor_.Tau(); }
 
 private:
     actuators::SimulatedMainPropulsion main_propulsor_{};
@@ -57,12 +59,14 @@ public:
     // Simulated rudder dynamics
     void Step(double dt) { rudder_.Step(dt); }
 
-    void SetAngleCommand(double angle_command) { rudder_.SetAngleCommand(angle_command); }
+    void SetAngleCommand(double delta_c) { rudder_.SetAngleCommand(delta_c); }
 
-    const double& Area() const { return rudder_.Area(); }
     const double& Angle() const { return rudder_.Angle(); }
     const double& AngleRate() const { return rudder_.AngleRate(); }
     const double& AngleCommand() const { return rudder_.AngleCommand(); };
+
+    const arma::vec3& ThrustConfig() const { return rudder_.ThrustConfig(); }
+    const arma::vec6& Tau(double u) { return rudder_.Tau(u); }
 
 private:
     actuators::SimulatedRudder rudder_{};
@@ -72,14 +76,16 @@ class TunnelThruster {
 public:
     void Step(double dt) { tunnel_thruster_.Step(dt); }
 
-    void SetRpmCommand(double rpm_command) { tunnel_thruster_.SetRpmCommand(rpm_command); }
+    void SetRpmCommand(double n_c) { tunnel_thruster_.SetRpmCommand(n_c); }
 
     const double& Rpm() const { return tunnel_thruster_.Rpm(); }
     const double& RpmRate() const { return tunnel_thruster_.RpmRate(); }
     const double& RpmCommand() const { return tunnel_thruster_.RpmCommand(); }
     const double& MaxRpm() const { return tunnel_thruster_.MaxRpm(); }
     const double& MinRpm() const { return tunnel_thruster_.MinRpm(); }
-    const arma::vec3& Position() const { return tunnel_thruster_.Position(); } 
+
+    const arma::vec3& ThrustConfig() const { return tunnel_thruster_.ThrustConfig(); }
+    const arma::vec6& Tau() { return tunnel_thruster_.Tau(); }
 
 private:
     actuators::SimulatedTunnelThruster tunnel_thruster_{};

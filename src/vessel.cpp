@@ -14,7 +14,6 @@ Reference model ------------> Course autopilot -------------> Marine craft -----
          --------------------------<---------State estimator <----------------------------------------    
                                             - CV kalman filter                  noisy measuremeants
 */  
-
 namespace vessel {
 
 void Vessel::Step(double dt) {
@@ -24,7 +23,8 @@ void Vessel::Step(double dt) {
     reference_ = guidance_.Reference();
     
     // Dynamics update
-    CalculateForces();
+    tau_ = thrust_allocator_.Tau(dynamics_.U()); // + wind, wave, hydrodynamic, hydrostatic
+    dynamics_.SetTau(tau_);
     dynamics_.Step(dt);
 
     // Controller update

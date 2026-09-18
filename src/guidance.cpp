@@ -14,7 +14,7 @@ void Guidance::Step(double dt) {
     
         // Heading reference
         if (common::inrange(t, 0, 10)) {
-            reference_.psi_d = 10;
+            reference_.psi_d = 20;
         } else if (common::inrange(t, 10, 20)) {
             reference_.psi_d = -20;
         } else {

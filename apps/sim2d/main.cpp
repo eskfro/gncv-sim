@@ -19,7 +19,7 @@ int main() {
 
     while (running) {
 
-        std::cout << "test - " << count << std::endl;
+        std::cout << count << std::endl;
 
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
 

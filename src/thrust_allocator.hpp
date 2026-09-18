@@ -14,10 +14,15 @@ public:
     ThrustAllocator() = default;
 
     void Step(double dt);
+    void Init();
 
     void CalculateActuatorReferences(const arma::vec3& thrust_vector);
 
+    const arma::vec6 Tau(double u) const;
+
 private:
+    int num_actuators_{};        
+    arma::mat T_alpha_{};       // thrust matrix   :   tau = T(a) * f
     common::ActuatorCommands actuator_references_{};
     common::ActuatorCommands actuator_commands_{};
 

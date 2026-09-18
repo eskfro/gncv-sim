@@ -15,9 +15,9 @@ public:
     common::Reference Reference() { return reference_; }
 
 private:
-    double time_;
-    common::GuidanceMode guidance_mode_;
-    common::Reference reference_;
+    double time_{};
+    common::GuidanceMode guidance_mode_ = common::GuidanceMode::HeadingHold;
+    common::Reference reference_{};
 };
 
 } // namespace control

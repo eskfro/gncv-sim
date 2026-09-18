@@ -57,7 +57,8 @@ public:
 
     void Step(double dt);
 
-    void CalculateForces(); // tau = tau_wind + tau_wave + tau_hyd + tau_hs + tau_control
+    // Forces: tau = tau_wind + tau_wave + tau_hyd + tau_hs + tau_control
+
     void SetActuatorCommands();
     
     arma::vec6 Tau() { return tau_; }
@@ -76,7 +77,7 @@ private:
     arma::vec6 tau_{};
     vessel::Dynamics dynamics_{};
 
-    // Modules ish
+    // Modules
     guidance::Guidance guidance_{};
     common::Reference reference_{};
     controller::Controller controller_{};

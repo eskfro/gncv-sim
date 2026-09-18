@@ -25,7 +25,7 @@ public:
     const arma::mat44 Cov() const { return P_; }
 
 private:
-    arma::vec4 x_{};            // (x, y, vx, vy)
+    arma::vec4 x_{};            // state (x, y, vx, vy)
     arma::mat44 P_{};           // state covariance
 
     double sigma_a = 0.5;       // process noise stddev

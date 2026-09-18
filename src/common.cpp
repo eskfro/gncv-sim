@@ -27,8 +27,8 @@ double ssa(double angle) {
 }
 
 // First order lowpass dynamics step
-double first_order_lowpass(double dt, double time_constant, double reference, double curr) {
-    return (dt / time_constant) * (reference - curr);
+double first_order_lowpass(double dt, double time_constant, double command, double curr) {
+    return (dt / time_constant) * (command - curr);
 }
 
 arma::mat66 join33blocks(arma::mat33 A, arma::mat33 B, arma::mat33 C, arma::mat33 D) {

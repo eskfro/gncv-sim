@@ -51,6 +51,7 @@ public:
 
     const common::Eta& Eta() { return eta_; }
     const common::Nu& Nu() { return nu_; }
+    double U();
 
 private:
     // Vessel params
