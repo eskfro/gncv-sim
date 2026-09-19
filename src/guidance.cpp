@@ -23,7 +23,7 @@ void Guidance::Step(double dt) {
 
         // Speed reference
         reference_.u_d = 10;
-        reference_.eta_d.Reset(); // we dont use this in HeadingHold mode
+        reference_.eta_d.zeros(); // we dont use this in HeadingHold mode
 
         // Integrate time
         time_ += dt;

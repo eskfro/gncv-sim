@@ -11,8 +11,8 @@ Output:
 
 namespace controller {
 
-void Controller::UpdateThrustReference(common::Reference reference, common::Eta eta, common::Nu nu) {
-    const double psi = eta.Psi();
+void Controller::UpdateThrustReference(common::Reference reference, arma::vec6 eta, arma::vec6 nu) {
+    const double psi = eta(5);
     double psi_e = reference.psi_d - psi;
 
     switch (reference.guidance_mode) {

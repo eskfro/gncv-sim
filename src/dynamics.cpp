@@ -29,10 +29,10 @@ void Dynamics::Init(std::filesystem::path vessel_config) {
     const VesselParams p = vessel_params_;
 
     // Compose init state
-    eta_.SetVector(p.eta_0.Vector());
-    nu_.SetVector(p.nu_0.Vector());
-    x_.subvec(0, 5) = eta_.Vector();
-    x_.subvec(6, 11) = nu_.Vector();
+    eta_ = p.eta_0;
+    nu_ = p.nu_0;
+    x_.subvec(0, 5) = eta_;
+    x_.subvec(6, 11) = nu_;
 
     // Construct inertia dyadic in r_cg
     const arma::mat33 I_cg = common::I_cg(p.m, p.r44, p.r55, p.r66);
@@ -54,16 +54,16 @@ void Dynamics::Init(std::filesystem::path vessel_config) {
 // Update the state dependent matrices
 void Dynamics::UpdateDynamicMatrices() {
     const VesselParams p = vessel_params_;
-    C_rb_ = common::C_rb(p.m, I_co_, p.r_cg, nu_.Vector());
-    g_ = common::g(p.w, p.b, p.r_cg, p.r_cb, eta_.Vector());
-    D_n_ = common::D_n(p.d_n_coeffs, nu_.Vector());
+    C_rb_ = common::C_rb(p.m, I_co_, p.r_cg, nu_);
+    g_ = common::g(p.w, p.b, p.r_cg, p.r_cb, eta_);
+    D_n_ = common::D_n(p.d_n_coeffs, nu_);
     D_ = D_l_ + D_n_;
 }
 
 double Dynamics::U() {
     arma::vec2 vec;
-    vec(0) = nu_.u();
-    vec(1) = nu_.v();
+    vec(0) = nu_(0);
+    vec(1) = nu_(1);
     return arma::norm(vec, 2);
 }
 

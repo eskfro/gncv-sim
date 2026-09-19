@@ -13,49 +13,19 @@ using vec12 = arma::Col<double>::fixed<12>;
 using mat24 = arma::Mat<double>::fixed<2, 4>;
 using mat42 = arma::Mat<double>::fixed<4, 2>;
 
-// Eta = positions
-// Position and orientetion vector interface
-class Eta { // η
-public:
-    void Reset() { vector_.fill(0.0); }
-    void SetVector(arma::vec6 vector) { vector_ = vector; }
-
-    const double Psi() const { return vector_.at(5); }
-    arma::vec3 Position() const { return vector_.subvec(0, 2); }
-    arma::vec3 Attitude() const { return vector_.subvec(3, 5); }
-    const arma::vec6& Vector() const { return vector_; }
-
-private:
-    // (0-2) : (x, y, z): north, east, down positons
-    // (3-5) : (phi, theta, psi) : roll, pitch, yaw angle
-    arma::vec6 vector_{};
-};
-
-// Nu = rates
-// Position rates and orientation rates interface
-class Nu { // ν
-public:
-    void Reset() { vector_.fill(0.0); }
-    void SetVector(arma::vec6 vector) { vector_ = vector; }
-
-    double u() { return vector_.at(0); }
-    double v() { return vector_.at(1); }
-    double w() { return vector_.at(2); }
-
-    arma::vec3 LinearVelocity() const { return vector_.subvec(0, 2); }
-    arma::vec3 AngularVelocity() const { return vector_.subvec(3, 5); }
-    const arma::vec6& Vector() const { return vector_; }
-private:
-    // (0-2) : (u, v, w) : surge, sway, heave velocity
-    // (3-5) : (p, q, r) : roll, pitch, yaw rates
-    arma::vec6 vector_{};
-};
+// eta = (x, y, z, phi, theta, psi) : generalized position (NED frame)
+//   (0-2) : (x, y, z): north, east, down positons
+//   (3-5) : (phi, theta, psi) : roll, pitch, yaw angle
+//
+// nu = (u, v, w, p, q, r) : generalized velocity (body frame)
+//   (0-2) : (u, v, w) : surge, sway, heave velocity
+//   (3-5) : (p, q, r) : roll, pitch, yaw rates
 
 enum class GuidanceMode : uint8_t {HeadingHold, PositionHold, WaypointTracking};
 
 struct Reference {
     GuidanceMode guidance_mode{};
-    Eta eta_d{};
+    arma::vec6 eta_d{};
     double psi_d{};
     double u_d{};
 };

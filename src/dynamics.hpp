@@ -33,8 +33,8 @@ struct VesselParams {
     arma::vec6 d_n_coeffs = {-5.0e3, -1.0e4, -5.0e3, -1.0e5, -1.0e5, -5.0e5};
 
     // Initial conditions
-    common::Eta eta_0{};
-    common::Nu nu_0{};
+    arma::vec6 eta_0{};
+    arma::vec6 nu_0{};
 };
 
 class Dynamics {
@@ -49,8 +49,8 @@ public:
     // Forces from the vessel fed into dynamics 
     void SetTau(arma::vec6 tau);
 
-    const common::Eta& Eta() { return eta_; }
-    const common::Nu& Nu() { return nu_; }
+    const arma::vec6& Eta() { return eta_; }
+    const arma::vec6& Nu() { return nu_; }
     double U();
 
 private:
@@ -59,8 +59,8 @@ private:
 
     // State
     common::vec12 x_;
-    common::Eta eta_{};
-    common::Nu nu_{};
+    arma::vec6 eta_{};
+    arma::vec6 nu_{};
 
     // Dynamics
     arma::mat66 D_n_{};     // D_n(v)   : nonlinear damping
