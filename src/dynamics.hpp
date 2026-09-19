@@ -42,25 +42,29 @@ public:
     Dynamics() = default;
 
     void Step(double dt);
+    common::vec12 StateDot(const common::vec12& x, double t) const;
 
     void UpdateDynamicMatrices();
     void Init(std::filesystem::path vessel_config);     
 
     // Forces from the vessel fed into dynamics 
-    void SetTau(arma::vec6 tau);
+    void SetTau(const arma::vec6& tau);
 
-    const arma::vec6& Eta() { return eta_; }
-    const arma::vec6& Nu() { return nu_; }
-    double U();
+    const arma::vec6& Eta() const { return eta_; }
+    const arma::vec6& Nu() const { return nu_; }
+    double U() const { return common::U(nu_); }
 
 private:
+    double t_{};
+
     // Vessel params
     VesselParams vessel_params_ = VesselParams();
 
     // State
-    common::vec12 x_;
+    common::vec12 x_{};
     arma::vec6 eta_{};
     arma::vec6 nu_{};
+    arma::vec6 tau_{};
 
     // Dynamics
     arma::mat66 D_n_{};     // D_n(v)   : nonlinear damping

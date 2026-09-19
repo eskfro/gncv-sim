@@ -211,6 +211,7 @@ arma::vec6 g(double w, double b, const arma::vec3& r_cg,
     return g;
 }
 
+// f : (vec12, double) -> vec12
 vec12 solver_12d_rk4(std::function<vec12(vec12, double)> f, vec12 x, double t, double dt){
     const vec12 k1 = f(x + (0.0) * dt     ,    t + (0.0) * dt);
     const vec12 k2 = f(x + (0.5) * dt * k1,    t + (0.5) * dt);

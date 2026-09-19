@@ -74,8 +74,8 @@ private:
     double sideslip_angle_{}; // = sin-1(vr/Ur)             B
 
     // Dynamics
-    arma::vec6 tau_{};
     vessel::Dynamics dynamics_{};
+    arma::vec6 tau_{};
 
     // Modules
     guidance::Guidance guidance_{};
