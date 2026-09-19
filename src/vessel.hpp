@@ -53,7 +53,7 @@ Other calculations tied to the physical vessel
 */
 class Vessel {
 public:
-    Vessel() = default;
+    Vessel();
 
     void Step(double dt);
 
@@ -63,6 +63,7 @@ public:
     
     arma::vec6 Tau() { return tau_; }
     vessel::Dynamics* Dynamics() { return &dynamics_; }
+    common::VesselSnapshot Snapshot() const;
 
 private:
     std::string_view name_{"MyVessel"};

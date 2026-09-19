@@ -50,9 +50,13 @@ public:
     // Forces from the vessel fed into dynamics 
     void SetTau(const arma::vec6& tau);
 
+    // Getters
     const arma::vec6& Eta() const { return eta_; }
     const arma::vec6& Nu() const { return nu_; }
+    const arma::vec6& Tau() const { return tau_; }
+    const common::vec12 State() const { return x_; } 
     double U() const { return common::U(nu_); }
+    double Time() const { return t_; };
 
 private:
     double t_{};

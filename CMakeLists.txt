@@ -12,6 +12,12 @@ add_library(gncv-sim-core
     src/common.cpp
     src/actuator.cpp
     src/sensor.cpp
+    src/sensor_io.cpp
+    src/dynamics.cpp
+    src/guidance.cpp
+    src/controller.cpp
+    src/estimation.cpp
+    src/thrust_allocator.cpp
     src/vessel.cpp
 )
 target_include_directories(gncv-sim-core PUBLIC src ${ARMADILLO_INCLUDE_DIRS})
@@ -22,6 +28,11 @@ add_executable(sim2d
     apps/sim2d/sim2d.cpp
 )
 target_link_libraries(sim2d PRIVATE gncv-sim-core)
+
+add_executable(simulator_v1
+    apps/simulator_v1/main.cpp
+)
+target_link_libraries(simulator_v1 PRIVATE gncv-sim-core)
 
 if(BUILD_TESTING)
     add_executable(test_common

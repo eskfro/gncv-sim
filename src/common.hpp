@@ -1,3 +1,10 @@
+// eta = (x, y, z, phi, theta, psi) : generalized position (NED frame)
+//   (0-2) : (x, y, z): north, east, down positons
+//   (3-5) : (phi, theta, psi) : roll, pitch, yaw angle
+//
+// nu = (u, v, w, p, q, r) : generalized velocity (body frame)
+//   (0-2) : (u, v, w) : surge, sway, heave velocity
+//   (3-5) : (p, q, r) : roll, pitch, yaw rates
 #pragma once
 
 #include <armadillo>
@@ -12,14 +19,6 @@ enum class Frames : int {Body, Ned, Enu};
 using vec12 = arma::Col<double>::fixed<12>;
 using mat24 = arma::Mat<double>::fixed<2, 4>;
 using mat42 = arma::Mat<double>::fixed<4, 2>;
-
-// eta = (x, y, z, phi, theta, psi) : generalized position (NED frame)
-//   (0-2) : (x, y, z): north, east, down positons
-//   (3-5) : (phi, theta, psi) : roll, pitch, yaw angle
-//
-// nu = (u, v, w, p, q, r) : generalized velocity (body frame)
-//   (0-2) : (u, v, w) : surge, sway, heave velocity
-//   (3-5) : (p, q, r) : roll, pitch, yaw rates
 
 enum class GuidanceMode : uint8_t {HeadingHold, PositionHold, WaypointTracking};
 
@@ -51,6 +50,13 @@ struct ControllerParams {
     double kd_psi = 2;
 
 };
+
+struct VesselSnapshot {
+    double t;
+    vec12 x;
+    arma::vec6 tau;
+};
+
 
 // Utilities
 double deg2rad(double deg);

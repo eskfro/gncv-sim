@@ -16,6 +16,11 @@ Reference model ------------> Course autopilot -------------> Marine craft -----
 */  
 namespace vessel {
 
+Vessel::Vessel() {
+    dynamics_.Init({});
+    thrust_allocator_.Init();
+}
+
 void Vessel::Step(double dt) {
 
     // Guidance update
@@ -33,6 +38,14 @@ void Vessel::Step(double dt) {
     tau_ = thrust_allocator_.Tau();
     dynamics_.SetTau(tau_);
     dynamics_.Step(dt);
+}
+
+common::VesselSnapshot Vessel::Snapshot() const {
+    common::VesselSnapshot s{};
+    s.t = dynamics_.Time();
+    s.x = dynamics_.State();
+    s.tau = dynamics_.Tau();
+    return s;
 }
 
 } // namespace vessel
