@@ -45,6 +45,10 @@ arma::mat44 join22blocks(arma::mat22 A, arma::mat22 B, arma::mat22 C, arma::mat2
     );
 }
 
+double U(const arma::vec6& nu) {
+    return arma::norm(nu.subvec(0, 1), 2);
+}
+
 // Cross product matrix
 // S(a)b = a x b
 arma::mat33 S(const arma::vec3& a) {

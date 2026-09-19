@@ -48,7 +48,9 @@ public:
     const double& MinRpm() const { return main_propulsor_.MinRpm(); }
 
     const arma::vec3& ThrustConfig() const { return main_propulsor_.ThrustConfig(); }
-    const arma::vec6& Tau() { return main_propulsor_.Tau(); }
+    const arma::vec6& Tau() const { return main_propulsor_.Tau(); }
+
+    double ForceToCommand(double f) const { return main_propulsor_.ForceToCommand(f); }
 
 private:
     actuators::SimulatedMainPropulsion main_propulsor_{};
@@ -59,6 +61,7 @@ public:
     // Simulated rudder dynamics
     void Step(double dt) { rudder_.Step(dt); }
 
+    void UpdateTau(double u) { rudder_.UpdateTau(u); }
     void SetAngleCommand(double delta_c) { rudder_.SetAngleCommand(delta_c); }
 
     const double& Angle() const { return rudder_.Angle(); }
@@ -66,7 +69,9 @@ public:
     const double& AngleCommand() const { return rudder_.AngleCommand(); };
 
     const arma::vec3& ThrustConfig() const { return rudder_.ThrustConfig(); }
-    const arma::vec6& Tau(double u) { return rudder_.Tau(u); }
+    const arma::vec6& Tau() const { return rudder_.Tau(); }
+
+    double ForceToCommand(double f, double u) const { return rudder_.ForceToCommand(f, u); }
 
 private:
     actuators::SimulatedRudder rudder_{};
@@ -85,7 +90,9 @@ public:
     const double& MinRpm() const { return tunnel_thruster_.MinRpm(); }
 
     const arma::vec3& ThrustConfig() const { return tunnel_thruster_.ThrustConfig(); }
-    const arma::vec6& Tau() { return tunnel_thruster_.Tau(); }
+    const arma::vec6& Tau() const { return tunnel_thruster_.Tau(); }
+
+    double ForceToCommand(double f) const { return tunnel_thruster_.ForceToCommand(f); }
 
 private:
     actuators::SimulatedTunnelThruster tunnel_thruster_{};

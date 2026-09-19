@@ -13,12 +13,12 @@ class ThrustAllocator {
 public:
     ThrustAllocator() = default;
 
-    void Step(double dt);
+    void Step(double dt, double u);
     void Init();
 
-    void CalculateActuatorReferences(const arma::vec3& thrust_vector);
+    void CalculateActuatorReferences(const arma::vec3& thrust_vector, const arma::vec6& nu);
 
-    const arma::vec6 Tau(double u) const;
+    const arma::vec6 Tau() const;
 
 private:
     int num_actuators_{};        

@@ -61,10 +61,7 @@ void Dynamics::UpdateDynamicMatrices() {
 }
 
 double Dynamics::U() {
-    arma::vec2 vec;
-    vec(0) = nu_(0);
-    vec(1) = nu_(1);
-    return arma::norm(vec, 2);
+    return common::U(nu_);
 }
 
 } // namespace vessel

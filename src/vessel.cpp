@@ -22,17 +22,17 @@ void Vessel::Step(double dt) {
     guidance_.Step(dt);
     reference_ = guidance_.Reference();
     
-    // Dynamics update
-    tau_ = thrust_allocator_.Tau(dynamics_.U()); // + wind, wave, hydrodynamic, hydrostatic
-    dynamics_.SetTau(tau_);
-    dynamics_.Step(dt);
-
     // Controller update
     controller_.UpdateThrustReference(reference_, dynamics_.Eta(), dynamics_.Nu());
 
     // Actuator allocation
-    thrust_allocator_.CalculateActuatorReferences(controller_.ThrustVector());
-    thrust_allocator_.Step(dt);
+    thrust_allocator_.CalculateActuatorReferences(controller_.ThrustReference(), dynamics_.Nu());
+    thrust_allocator_.Step(dt, dynamics_.U());
+
+    // Dynamics update
+    tau_ = thrust_allocator_.Tau();
+    dynamics_.SetTau(tau_);
+    dynamics_.Step(dt);
 }
 
 } // namespace vessel

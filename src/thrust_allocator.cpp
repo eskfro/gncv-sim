@@ -2,6 +2,7 @@
 #include "actuator_io.hpp"
 #include "common.hpp"
 #include <armadillo>
+#include <cstddef>
 
 namespace allocator {
 
@@ -32,15 +33,23 @@ void ThrustAllocator::Init() {
 }
 
 // Set actuator_references from thrust_vector
-void ThrustAllocator::CalculateActuatorReferences(const arma::vec3& thrust_vector) {
-    
+void ThrustAllocator::CalculateActuatorReferences(const arma::vec3& thrust_vector, const arma::vec6& nu) {
+    // Solve T_alpha * f = thrust_vector
+    const arma::vec f = arma::pinv(T_alpha_) * thrust_vector;   // pseudo inverse (over actuated)
+    const double u = common::U(nu);
+
+    // Distribute references
+    int idx = 0;
+    for (auto& r : rudders_)          actuator_references_.delta_r = r.ForceToCommand(f(idx++), u);
+    for (auto& mp : main_propulsors_) actuator_references_.n_mp    = mp.ForceToCommand(f(idx++));
+    for (auto& tt : tunnel_thrusters_) actuator_references_.n_tt   = tt.ForceToCommand(f(idx++));
 }
 
-void ThrustAllocator::Step(double dt) {
+void ThrustAllocator::Step(double dt, double u) {
     // Time constants for command-reference dynamics
-    double T_r = 0.1;
-    double T_tt = 0.1;
-    double T_mp = 0.1;
+    const double T_r = 0.1;
+    const double T_tt = 0.1;
+    const double T_mp = 0.1;
 
     // commands = H(s) * reference
     const common::ActuatorCommands ref = actuator_references_;
@@ -49,32 +58,32 @@ void ThrustAllocator::Step(double dt) {
     actuator_commands_.n_tt += common::first_order_lowpass(dt, T_tt, ref.n_tt, cmd.n_tt);
     actuator_commands_.n_mp += common::first_order_lowpass(dt, T_mp, ref.n_mp, cmd.n_mp);
 
-
     // Actuator update
-    for (auto r : rudders_) {
+    for (auto& r : rudders_) {
         r.SetAngleCommand(actuator_commands_.delta_r);
         r.Step(dt);
+        r.UpdateTau(u);
     }
-    for (auto mp : main_propulsors_) {
+    for (auto& mp : main_propulsors_) {
         mp.SetRpmCommand(actuator_commands_.n_mp);
         mp.Step(dt);
     }
-    for (auto tt : tunnel_thrusters_) {
+    for (auto& tt : tunnel_thrusters_) {
         tt.SetRpmCommand(actuator_commands_.n_tt);
         tt.Step(dt);
     }
 }
 
-const arma::vec6 ThrustAllocator::Tau(double u) const {
+const arma::vec6 ThrustAllocator::Tau() const {
     arma::vec6 tau{};
     // Actuator update
-    for (auto r : rudders_) {
-        tau += r.Tau(u);
+    for (auto& r : rudders_) {
+        tau += r.Tau();
     }
-    for (auto mp : main_propulsors_) {
+    for (auto& mp : main_propulsors_) {
         tau += mp.Tau();
     }
-    for (auto tt : tunnel_thrusters_) {
+    for (auto& tt : tunnel_thrusters_) {
         tau += tt.Tau();
     }
     return tau;

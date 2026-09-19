@@ -41,7 +41,9 @@ public:
     const double& MinRpm() const { return n_min_; }
 
     const arma::vec3& ThrustConfig() const  { return thrust_config_; }
-    const arma::vec6& Tau();
+    const arma::vec6& Tau() const;
+
+    double ForceToCommand(double f) const;
 
 private:
     // Things
@@ -69,12 +71,16 @@ public:
 
     void SetAngleCommand(double delta_c);
 
+    void UpdateTau(double u);
+
     const double& Angle() const { return delta_r_; }
     const double& AngleRate() const { return delta_r_rate_; }
     const double& AngleCommand() const { return delta_c_; };
 
     const arma::vec3& ThrustConfig() const { return thrust_config_; }
-    const arma::vec6& Tau(double u);
+    const arma::vec6& Tau() const;
+
+    double ForceToCommand(double f, double u) const;
 
 private:
     // Things
@@ -84,8 +90,8 @@ private:
     
     // Dynamics
     double time_constant_{1.0};
-    double delta_max{common::deg2rad(35)};
-    double delta_min{common::deg2rad(-35)};
+    double delta_max_{common::deg2rad(35)};
+    double delta_min_{common::deg2rad(-35)};
     
     // Force
     double k_r_ = 1;
@@ -110,7 +116,9 @@ public:
     const double& MinRpm() const { return n_min_; }
 
     const arma::vec3& ThrustConfig() const { return thrust_config_; }
-    const arma::vec6& Tau();
+    const arma::vec6& Tau() const;
+
+    double ForceToCommand(double f) const;
 
 private:
     // Things
