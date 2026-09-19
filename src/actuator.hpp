@@ -55,7 +55,7 @@ private:
     double n_min_{-200};
 
     // Force
-    double k_mp_ = 8.0;
+    double k_mp_ = 16.0;
     arma::vec6 tau_{};
 
     // State

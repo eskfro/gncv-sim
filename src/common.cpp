@@ -232,8 +232,10 @@ arma::mat66 D_n(const arma::vec6& coeffs, const arma::vec6& nu) {
     return arma::diagmat(diag_terms);
 }
 
+// D_l: linear damping matrix, diagonal-only simplification
+// coeffs = [X_u, Y_v, Z_w, K_p, M_q, N_r]  (negative values, same convention as D_n)
 arma::mat66 D_l(const arma::vec6 &coeffs) {
-    return arma::diagmat(coeffs);
+    return -arma::diagmat(coeffs);
 }
 
 } // namespace common

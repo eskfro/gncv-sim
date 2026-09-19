@@ -11,8 +11,8 @@ public:
     const arma::vec3& ThrustReference() const { return thrust_reference_; }
 
 private:
-arma::vec3 thrust_reference_{};
-common::ControllerParams controller_params_{};
+    arma::vec3 thrust_reference_{};
+    common::ControllerParams controller_params_{};
 };
 
 } // namespace controller

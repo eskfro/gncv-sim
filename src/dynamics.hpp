@@ -33,8 +33,8 @@ struct VesselParams {
     arma::vec6 d_n_coeffs = {-5.0e3, -1.4e5, -5.0e5, -1.0e7, -1.0e8, -3.0e8};
 
     // Initial conditions
-    arma::vec6 eta_0{};
-    arma::vec6 nu_0{};
+    arma::vec6 eta_0{0, 0, 0, common::deg2rad(5), 0, 0};
+    arma::vec6 nu_0{0, 0, 0, 0, 0, 0};
 };
 
 class Dynamics {
