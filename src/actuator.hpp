@@ -51,11 +51,11 @@ private:
     arma::vec3 thrust_config_ = {1, 0, 0};
 
     double time_constant_{3.0};
-    double n_max_{600};
-    double n_min_{-600};
+    double n_max_{200};
+    double n_min_{-200};
 
     // Force
-    double k_mp_ = 1;
+    double k_mp_ = 8.0;
     arma::vec6 tau_{};
 
     // State
@@ -85,7 +85,7 @@ public:
 private:
     // Things
     std::string_view name_ = "MyRudder";
-    double l_x_ = -10;       
+    double l_x_ = -33;       
     arma::vec3 thrust_config_ = {0, 1, l_x_}; 
     
     // Dynamics
@@ -94,7 +94,7 @@ private:
     double delta_min_{common::deg2rad(-35)};
     
     // Force
-    double k_r_ = 1;
+    double k_r_ = 7.7e3;
     arma::vec6 tau_;
 
     // State
@@ -123,7 +123,7 @@ public:
 private:
     // Things
     std::string_view name_ = "MyTunnelThruster";
-    double l_x_ = 10;
+    double l_x_ = 30;
     arma::vec3 thrust_config_ = {0, 1, l_x_};     
 
     // Dynamics
@@ -132,7 +132,7 @@ private:
     double n_min_{-1000};
 
     // Force
-    double k_tt_ = 1;
+    double k_tt_ = 0.1;
     arma::vec6 tau_;
 
     // Rpm state

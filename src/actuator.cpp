@@ -32,7 +32,7 @@ double SimulatedMainPropulsion::ForceToCommand(double f) const {
 // === RUDDER ===
 
 void SimulatedRudder::Step(double dt) {
-    delta_r_ += common::first_order_lowpass(dt, time_constant_, delta_c_, delta_c_);
+    delta_r_ += common::first_order_lowpass(dt, time_constant_, delta_c_, delta_r_);
 }
 
 void SimulatedRudder::UpdateTau(double u) {

@@ -45,9 +45,9 @@ struct ImuSnapshot {
 };
 
 struct ControllerParams {
-    double kp_psi = 5;
-    double kp_u = 10;
-    double kd_psi = 2;
+    double kp_psi = 6e6;
+    double kp_u = 5e5;
+    double kd_psi = 6e7;
 
 };
 
