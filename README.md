@@ -8,4 +8,7 @@ Guidance, Navigation and Control of Vehicles simulator
 Simple vessel simulator. The data is saved in a csv-file.
 
 ### Simulator v1 plotter
-<img width="1377" height="786" alt="image" src="https://github.com/user-attachments/assets/24e7a529-f346-477a-a13f-c2841d46d023" />
+<img width="1363" height="777" alt="image" src="https://github.com/user-attachments/assets/d02807a7-71e9-48e2-883d-1022b666766f" />
+<img width="1363" height="777" alt="image" src="https://github.com/user-attachments/assets/f9006345-5b17-45aa-bdd5-56a2cb610634" />
+
+
