@@ -17,7 +17,7 @@
 
 std::atomic<bool> running{true};
 
-void print_every_second(int n);
+void print_every_ten_seconds(int n);
 void write_to_csv(std::vector<common::VesselSnapshot>& snapshots);
 void simulator_v1_plotter();
 
@@ -39,7 +39,7 @@ int main() {
         vessel.Step(dt);
         snapshots.push_back(vessel.Snapshot());
         n++;
-        print_every_second(n);
+        print_every_ten_seconds(n);
     }
     std::cout << "\nSimulation finished, writing to disk\n";
 
@@ -113,10 +113,10 @@ void write_to_csv(std::vector<common::VesselSnapshot>& snapshots) {
     std::cout << "Wrote to " << name.str() << std::endl; 
 }
 
-void print_every_second(int n) {
-    const int n_per_second = std::lround(1 / dt);
-    if (n % n_per_second != 0) return;
-    int time_seconds = n / n_per_second;
+void print_every_ten_seconds(int n) {
+    const int n10s = 10 * std::lround(1 / dt);
+    if (n % n10s != 0) return;
+    int time_seconds = 10 * n / n10s;
     std::cout << time_seconds << " ";
 }
 

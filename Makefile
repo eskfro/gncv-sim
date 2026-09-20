@@ -5,6 +5,12 @@ v1:
 	chmod +x build/simulator_v1
 	./build/simulator_v1
 
-2:
+2d:
 	chmod +x build/sim2d
-	./build/sim2d 
+	./build/sim2d
+
+clean-v1:
+	rm -f simdata/simulator_v1/*.csv
+
+test:
+	./build/test_common

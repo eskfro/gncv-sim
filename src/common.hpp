@@ -12,6 +12,8 @@
 
 namespace common {
 
+constexpr double kKnots2Ms = 0.514444;
+
 // Probably dont need this
 enum class Frames : int {Body, Ned, Enu};
 
@@ -47,7 +49,7 @@ struct ImuSnapshot {
 struct ControllerParams {
     double kp_psi = 6e6;
     double kp_u = 6e5;
-    double ki_u = 4500;
+    double ki_u = 4700;
     double kd_psi = 6e7;
 
 };
@@ -85,6 +87,7 @@ arma::mat66 G(double nabla, double A_wp, double gmt, double gml, double x_cf, ar
 arma::mat66 J(const arma::vec6& eta);
 arma::mat33 I_cg(double m, double r44, double r55, double r66);
 arma::mat66 M_rb(double m, const arma::mat33& I0, const arma::vec3& r_cg);
+arma::mat66 M_a(double m, double i_x, double i_y, double i_z);
 arma::mat66 C_rb(double m, const arma::mat33& I0, const arma::vec3& r_cg, const arma::vec6& nu);
 arma::vec6 g(double w, double b, const arma::vec3& r_cg,
     const arma::vec3& r_cb, const arma::vec6& eta);

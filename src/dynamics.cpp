@@ -22,6 +22,7 @@ M nu' + C(nu)nu + D(nu)nu + g(eta) + g0 = tau + tau_wind + tau_wave
 namespace vessel {
 
 common::vec12 Dynamics::StateDot(const common::vec12& x, double t) const {
+    const bool underwater = false;
     const VesselParams p = vessel_params_;
     const arma::vec6 eta = x.subvec(0, 5);
     const arma::vec6 nu  = x.subvec(6, 11);
@@ -30,7 +31,13 @@ common::vec12 Dynamics::StateDot(const common::vec12& x, double t) const {
     const arma::mat66 C_rb  = common::C_rb(p.m, I_co_, p.r_cg, nu);
     const arma::mat66 D_n   = common::D_n(p.d_n_coeffs, nu);
     const arma::mat66 D_tot = D_l_ + D_n;
-    const arma::vec6  g_vec = common::g(p.w, p.b, p.r_cg, p.r_cb, eta);
+
+    arma::vec6 g_vec;
+    if (underwater) { // lol
+        g_vec = common::g(p.w, p.b, p.r_cg, p.r_cb, eta);
+    } else {
+        g_vec = G_ * eta;
+    }
 
     common::vec12 x_dot{};
     x_dot.subvec(0, 5)  = J * nu;
@@ -60,12 +67,12 @@ void Dynamics::Init(std::filesystem::path vessel_config) {
     x_.subvec(6, 11) = nu_;
 
     // Construct inertia dyadic in r_cg
-    const arma::mat33 I_cg = common::I_cg(p.m, p.r44, p.r55, p.r66);
-    I_co_ = I_cg - p.m * common::S(p.r_cg) * common::S(p.r_cg);
+    I_cg_ = common::I_cg(p.m, p.r44, p.r55, p.r66);
+    I_co_ = I_cg_ - p.m * common::S(p.r_cg) * common::S(p.r_cg);
 
     // Compose M_rb
     M_rb_ = common::M_rb(p.m, I_co_, p.r_cg);
-    M_a_ = arma::mat66(arma::fill::zeros);
+    M_a_ = common::M_a(p.m, I_cg_(0,0), I_cg_(1,1), I_cg_(2,2));
     M_ = M_rb_ + M_a_;
 
     // Compose G 

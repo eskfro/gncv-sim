@@ -79,7 +79,7 @@ arma::mat66 G(
     arma::vec3 r_p      // vector from co to P
 ) {
     int rho = 1025;     // water density
-    double g = 9.81;
+    double g = 9.81;    // apple constant
 
     arma::vec3 r_cf = {x_cf, 0, 0};
 
@@ -177,6 +177,19 @@ arma::mat66 M_rb(double m, const arma::mat33& I0, const arma::vec3& r_cg) {
 
     return join33blocks(M11, M12, M21, M22);
 }
+
+arma::mat66 M_a(double m, double i_x, double i_y, double i_z) {
+    return {
+        {0.1*m,  0,     0,  0, 0, 0},
+        {0,   0.8*m,    0,  0, 0, 0},
+        {0,  0,     1.0*m,  0, 0, 0},
+        {0,  0,  0,         0.3*i_x,0,          0},
+        {0,  0,  0,         0,      1.0*i_y,    0},
+        {0,  0,  0,         0,      0,          0.8*i_z}
+    };
+
+}
+
 
 // Corelois rigid body
 arma::mat66 C_rb(double m, const arma::mat33& I0, const arma::vec3& r_cg, const arma::vec6& nu) {

@@ -17,10 +17,11 @@ struct VesselParams {
     const double g = 9.81;                  // eple fra tre konstanten
     const double w = m * g;                 // weight
     const double b = w;                     // buoancy
+
     const double r44 = 3.5;                 // radius of gyration in roll
     const double r55 = 17.5;                // radius of gyration in pitch
     const double r66 = 17.5;                // radius of gyration in yaw
-
+    
     double area_wp = 560;                   // waterplane area (A_wp)
     double nabla = 1820;                    // displacement
     double gmt = 1.3;                        // transverse metacentric height
@@ -33,7 +34,7 @@ struct VesselParams {
     arma::vec6 d_n_coeffs = {-5.0e3, -1.4e5, -5.0e5, -1.0e7, -1.0e8, -3.0e8};
 
     // Initial conditions
-    arma::vec6 eta_0{0, 0, 0, common::deg2rad(5), 0, 0};
+    arma::vec6 eta_0{0, 0, 0, common::deg2rad(10), 0, 0};
     arma::vec6 nu_0{0, 0, 0, 0, 0, 0};
 };
 
@@ -85,6 +86,7 @@ private:
     arma::mat66 D_l_{};     // D_l      : linear damping
     arma::mat66 G_{};       // G        : linearized restoring forces
     arma::mat33 I_co_{};    // I_co     : inertia dyadic about r_co = 0
+    arma::mat33 I_cg_{};    // I_cg     : inertia dyadic about r_cg
 
 };
 
