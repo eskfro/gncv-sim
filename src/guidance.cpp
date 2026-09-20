@@ -12,15 +12,15 @@ void Guidance::Step(double dt) {
 
         reference_.guidance_mode = common::GuidanceMode::HeadingHold;
 
-        const double psi_d = 40.0;
+        const double psi_d = 30.0;
     
-        // Heading reference
-        if (common::inrange(t, 0, 120)) {
+        // Heading reference generator
+        if (common::inrange(t, 0, 60)) {
             reference_.psi_d = common::deg2rad(psi_d);
-        } else if (common::inrange(t, 120, 240)) {
+        } else if (common::inrange(t, 60, 120)) {
             reference_.psi_d = -common::deg2rad(psi_d);
         } else {
-            reference_.psi_d = 0;
+            reference_.psi_d = common::deg2rad(-180);
         }
 
         // Speed reference

@@ -73,15 +73,40 @@ void write_to_csv(std::vector<common::VesselSnapshot>& snapshots) {
     }
 
     // Header
+    // guidance_mode: 0 = HeadingHold, 1 = PositionHold, 2 = WaypointTracking
+    // *_ref = allocator reference, *_cmd = command after lowpass, no suffix = actuator state
+    // delta_r in rad, n_* in rpm
     file << "t,x,y,z,phi,theta,psi,u,v,w,p,q,r,"
-         << "tau_X,tau_Y,tau_Z,tau_K,tau_M,tau_N\n";
+         << "tau_X,tau_Y,tau_Z,tau_K,tau_M,tau_N,"
+         << "guidance_mode,x_d,y_d,psi_d,u_d,"
+         << "delta_r_ref,delta_r_cmd,delta_r,"
+         << "n_mp_ref,n_mp_cmd,n_mp,"
+         << "n_tt_ref,n_tt_cmd,n_tt\n";
 
-    // One row per snapshot: time, eta (6), nu (6), tau (6)
+    // One row per snapshot: time, eta (6), nu (6), tau (6), reference (5), actuators (9)
     file << std::setprecision(10);
     for (const auto& s : snapshots) {
         file << s.t;
         for (int i = 0; i < 12; i++) file << ',' << s.x(i);
         for (int i = 0; i < 6; i++) file << ',' << s.tau(i);
+
+        // Reference (cast the enum: uint8_t would print as a character)
+        file << ',' << static_cast<int>(s.reference.guidance_mode)
+             << ',' << s.reference.eta_d(0)
+             << ',' << s.reference.eta_d(1)
+             << ',' << s.reference.psi_d
+             << ',' << s.reference.u_d;
+
+        // Actuators: rudder, main propulsor, tunnel thruster
+        file << ',' << s.actuator_references.delta_r
+             << ',' << s.actuator_commands.delta_r
+             << ',' << s.actuator_states.delta_r
+             << ',' << s.actuator_references.n_mp
+             << ',' << s.actuator_commands.n_mp
+             << ',' << s.actuator_states.n_mp
+             << ',' << s.actuator_references.n_tt
+             << ',' << s.actuator_commands.n_tt
+             << ',' << s.actuator_states.n_tt;
         file << '\n';
     }
 

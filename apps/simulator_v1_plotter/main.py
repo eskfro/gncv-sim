@@ -9,6 +9,14 @@ MAX_FILES = 15  # only the newest files are listed
 
 RAD2DEG = 180.0 / np.pi
 
+# Same order as the GuidanceMode enum in common.hpp
+GUIDANCE_MODES = ["HeadingHold", "PositionHold", "WaypointTracking"]
+
+# Columns added after the first csv version. Older files lack them.
+REF_COLS = ["guidance_mode", "x_d", "y_d", "psi_d", "u_d"]
+ACT_COLS = ["delta_r_ref", "delta_r_cmd", "delta_r",
+            "n_mp_ref", "n_mp_cmd", "n_mp", "n_tt_ref", "n_tt_cmd", "n_tt"]
+
 
 def list_files():
     """Newest first, so the latest simulation is selected by default."""
@@ -28,6 +36,24 @@ def file_label(path):
 # Views. Each takes (fig, gs, d) and returns the axes it created.
 # d is the loaded csv: d["t"], d["x"], ..., d["tau_N"]
 # ---------------------------------------------------------------------------
+
+def has(d, cols):
+    return all(c in d.dtype.names for c in cols)
+
+
+def wrap(angle):
+    """Smallest signed angle, in (-pi, pi]."""
+    return np.arctan2(np.sin(angle), np.cos(angle))
+
+
+def ref_panel(ax, d, series, ylabel, scale=1.0):
+    """series: list of (column, label, plot style). Reference dashed, state solid."""
+    for col, label, style in series:
+        ax.plot(d["t"], d[col] * scale, style, label=label)
+    ax.set_ylabel(ylabel)
+    ax.grid(True)
+    ax.legend(loc="upper right", fontsize=8)
+
 
 def time_panel(ax, d, cols, ylabel, scale=1.0):
     for col in cols:
@@ -51,11 +77,18 @@ def view_overview(fig, gs, d):
     ax_ne.legend()
 
     ax_psi = fig.add_subplot(gs[0, 1])
-    time_panel(ax_psi, d, ["psi"], "Heading psi [deg]", RAD2DEG)
+    if has(d, ["psi_d"]):
+        ref_panel(ax_psi, d, [("psi", "psi", "C0-"), ("psi_d", "psi_d", "k--")],
+                  "Heading psi [deg]", RAD2DEG)
+    else:
+        time_panel(ax_psi, d, ["psi"], "Heading psi [deg]", RAD2DEG)
 
     ax_speed = fig.add_subplot(gs[1, 1], sharex=ax_psi)
     speed = np.sqrt(d["u"] ** 2 + d["v"] ** 2 + d["w"] ** 2)
-    ax_speed.plot(d["t"], speed)
+    ax_speed.plot(d["t"], speed, label="U")
+    if has(d, ["u_d"]):
+        ax_speed.plot(d["t"], d["u_d"], "k--", label="u_d")
+        ax_speed.legend(loc="upper right", fontsize=8)
     ax_speed.set_ylabel("Speed U [m/s]")
     ax_speed.set_xlabel("t [s]")
     ax_speed.grid(True)
@@ -64,7 +97,10 @@ def view_overview(fig, gs, d):
 
 def view_path(fig, gs, d):
     ax = fig.add_subplot(gs[0, 0])
-    ax.plot(d["y"], d["x"])
+    ax.plot(d["y"], d["x"], label="actual")
+    # x_d, y_d are all zero in HeadingHold, so only draw them when used
+    if has(d, ["x_d", "y_d"]) and (np.any(d["x_d"]) or np.any(d["y_d"])):
+        ax.plot(d["y_d"], d["x_d"], "k--", label="reference")
     ax.plot(d["y"][0], d["x"][0], "go", label="start")
     ax.plot(d["y"][-1], d["x"][-1], "rs", label="end")
 
@@ -140,14 +176,101 @@ def view_forces(fig, gs, d):
     return axes
 
 
-# name -> (grid rows, grid cols, column width ratios, function)
+def view_tracking(fig, gs, d):
+    """Reference vs actual, the errors, and which guidance mode is active."""
+    ax_psi = fig.add_subplot(gs[0, 0])
+    ref_panel(ax_psi, d, [("psi", "psi", "C0-"), ("psi_d", "psi_d", "k--")],
+              "Heading [deg]", RAD2DEG)
+    ax_psi.set_title("Heading")
+
+    ax_psi_err = fig.add_subplot(gs[0, 1], sharex=ax_psi)
+    ax_psi_err.plot(d["t"], wrap(d["psi_d"] - d["psi"]) * RAD2DEG, "C3")
+    ax_psi_err.set_ylabel("psi_d - psi [deg]")
+    ax_psi_err.set_title("Heading error")
+    ax_psi_err.grid(True)
+
+    ax_u = fig.add_subplot(gs[1, 0], sharex=ax_psi)
+    ref_panel(ax_u, d, [("u", "u", "C0-"), ("u_d", "u_d", "k--")], "Surge u [m/s]")
+
+    ax_u_err = fig.add_subplot(gs[1, 1], sharex=ax_psi)
+    ax_u_err.plot(d["t"], d["u_d"] - d["u"], "C3")
+    ax_u_err.set_ylabel("u_d - u [m/s]")
+    ax_u_err.grid(True)
+
+    ax_mode = fig.add_subplot(gs[2, :], sharex=ax_psi)
+    ax_mode.step(d["t"], d["guidance_mode"], where="post", color="C2")
+    ax_mode.set_yticks(range(len(GUIDANCE_MODES)))
+    ax_mode.set_yticklabels(GUIDANCE_MODES, fontsize=8)
+    ax_mode.set_ylim(-0.5, len(GUIDANCE_MODES) - 0.5)
+    ax_mode.set_ylabel("Mode")
+    ax_mode.set_xlabel("t [s]")
+    ax_mode.grid(True)
+    return [ax_psi, ax_psi_err, ax_u, ax_u_err, ax_mode]
+
+
+def view_actuators(fig, gs, d):
+    """Reference -> command -> state for each actuator (rudder in deg, propellers in rpm)."""
+    panels = [
+        ("delta_r", "Rudder delta_r [deg]", RAD2DEG),
+        ("n_mp", "Main propulsor n_mp [rpm]", 1.0),
+        ("n_tt", "Tunnel thruster n_tt [rpm]", 1.0),
+    ]
+    axes = []
+    for i, (name, label, scale) in enumerate(panels):
+        ax = fig.add_subplot(gs[i, 0], sharex=axes[0] if axes else None)
+        ref_panel(ax, d, [(f"{name}_ref", "reference", "k--"),
+                          (f"{name}_cmd", "command", "C1-"),
+                          (name, "state", "C0-")], label, scale)
+        axes.append(ax)
+    axes[-1].set_xlabel("t [s]")
+    return axes
+
+
+def view_actuator_forces(fig, gs, d):
+    """What the actuators produce: total tau next to the states that drive it."""
+    ax_tau = fig.add_subplot(gs[0, 0])
+    time_panel(ax_tau, d, ["tau_X", "tau_Y"], "Force [N]")
+    ax_tau.set_title("Forces")
+
+    ax_n = fig.add_subplot(gs[1, 0], sharex=ax_tau)
+    time_panel(ax_n, d, ["tau_N"], "Yaw moment N [Nm]")
+
+    ax_act = fig.add_subplot(gs[0, 1], sharex=ax_tau)
+    ax_act.plot(d["t"], d["n_mp"], label="n_mp")
+    ax_act.plot(d["t"], d["n_tt"], label="n_tt")
+    ax_act.set_ylabel("rpm")
+    ax_act.set_title("Propeller rpm")
+    ax_act.grid(True)
+    ax_act.legend(loc="upper right", fontsize=8)
+
+    ax_rud = fig.add_subplot(gs[1, 1], sharex=ax_tau)
+    ax_rud.plot(d["t"], d["delta_r"] * RAD2DEG)
+    ax_rud.set_ylabel("Rudder delta_r [deg]")
+    ax_rud.grid(True)
+
+    for ax in (ax_n, ax_rud):
+        ax.set_xlabel("t [s]")
+    return [ax_tau, ax_n, ax_act, ax_rud]
+
+
+# name -> (grid rows, grid cols, column width ratios, row height ratios, function)
 VIEWS = {
-    "Overview": (2, 2, [2, 1], view_overview),
-    "Path": (1, 1, None, view_path),
-    "Position": (3, 1, None, view_position),
-    "Attitude": (3, 1, None, view_attitude),
-    "Velocities": (2, 3, None, view_velocities),
-    "Forces": (2, 3, None, view_forces),
+    "Overview": (2, 2, [2, 1], None, view_overview),
+    "Path": (1, 1, None, None, view_path),
+    "Tracking": (3, 2, None, [3, 3, 1], view_tracking),
+    "Position": (3, 1, None, None, view_position),
+    "Attitude": (3, 1, None, None, view_attitude),
+    "Velocities": (2, 3, None, None, view_velocities),
+    "Forces": (2, 3, None, None, view_forces),
+    "Actuators": (3, 1, None, None, view_actuators),
+    "Act. & forces": (2, 2, None, None, view_actuator_forces),
+}
+
+# Views that need the columns added after the first csv version
+REQUIRES = {
+    "Tracking": REF_COLS,
+    "Actuators": ACT_COLS,
+    "Act. & forces": ACT_COLS,
 }
 
 
@@ -195,11 +318,23 @@ class Plotter:
             ax.remove()
 
         d = self.data()
-        rows, cols, ratios, view = VIEWS[self.view]
-        gs = self.fig.add_gridspec(rows, cols, left=0.26, right=0.97, top=0.90,
-                                   bottom=0.08, hspace=0.35, wspace=0.30,
-                                   width_ratios=ratios)
-        self.plot_axes = view(self.fig, gs, d)
+        rows, cols, width_ratios, height_ratios, view = VIEWS[self.view]
+
+        missing = [c for c in REQUIRES.get(self.view, []) if c not in d.dtype.names]
+        if missing:
+            # Old csv without the new columns: say so instead of raising KeyError
+            ax = self.fig.add_axes([0.26, 0.08, 0.71, 0.82])
+            ax.axis("off")
+            ax.text(0.5, 0.5, f"{self.file.name}\nhas no data for this view\n"
+                              f"(missing: {', '.join(missing[:3])}, ...)",
+                    ha="center", va="center")
+            self.plot_axes = [ax]
+        else:
+            gs = self.fig.add_gridspec(rows, cols, left=0.26, right=0.97, top=0.90,
+                                       bottom=0.08, hspace=0.35, wspace=0.30,
+                                       width_ratios=width_ratios,
+                                       height_ratios=height_ratios)
+            self.plot_axes = view(self.fig, gs, d)
         self.fig.suptitle(f"{self.view} - {self.file.name}  ({d['t'][-1]:.1f} s)")
         self.fig.canvas.draw_idle()
 

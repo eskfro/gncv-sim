@@ -47,12 +47,9 @@ common::VesselSnapshot Vessel::Snapshot() const {
     actuator_states.n_tt = thrust_allocator_.RpmTt();
     actuator_states.delta_r = thrust_allocator_.DeltaR();
     
-    common::ActuatorCommands actuator_references = thrust_allocator_.ActuatorReferences();
-    common::ActuatorCommands actuator_commands = thrust_allocator_.ActuatorCommands();
-    
     common::VesselSnapshot s{};
-    s.actuator_references = actuator_references;
-    s.actuator_commands = actuator_commands;
+    s.actuator_references = thrust_allocator_.ActuatorReferences();
+    s.actuator_commands = thrust_allocator_.ActuatorCommands();
     s.actuator_states = actuator_states;
     s.reference = guidance_.Reference();
     s.t = dynamics_.Time();

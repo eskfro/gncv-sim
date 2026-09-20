@@ -16,7 +16,7 @@ bool inrange(double value, double range_min, double range_max) {
     Check if a value is inside a range
     Helper to make code more readable
     */
-    return range_min < value && value < range_max;
+    return range_min <= value && value <= range_max;
 }
 
 bool closeto(double value, double desired) {

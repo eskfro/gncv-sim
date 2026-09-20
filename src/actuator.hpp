@@ -50,9 +50,9 @@ private:
     std::string_view name_ = "MyMainPropulsor";
     arma::vec3 thrust_config_ = {1, 0, 0};
 
-    double time_constant_{3.0};
-    double n_max_{200};
-    double n_min_{-200};
+    double time_constant_{2.0};
+    double n_max_{220};
+    double n_min_{-220};
 
     // Force
     double k_mp_ = 16.0;
@@ -89,7 +89,7 @@ private:
     arma::vec3 thrust_config_ = {0, 1, l_x_}; 
     
     // Dynamics
-    double time_constant_{1.0};
+    double time_constant_{2.0};
     double delta_max_{common::deg2rad(35)};
     double delta_min_{common::deg2rad(-35)};
     
@@ -127,7 +127,7 @@ private:
     arma::vec3 thrust_config_ = {0, 1, l_x_};     
 
     // Dynamics
-    double time_constant_{1.0};
+    double time_constant_{2.0};
     double n_max_{1000};
     double n_min_{-1000};
 
