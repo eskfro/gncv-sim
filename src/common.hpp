@@ -30,9 +30,9 @@ struct Reference {
 };
 
 struct ActuatorCommands {
-    double delta_r;   // rudder
     double n_mp;      // rpm main propulsor
     double n_tt;      // rpm tunnel thruster
+    double delta_r;   // rudder
 };
 
 struct ImuSnapshot {
@@ -46,13 +46,18 @@ struct ImuSnapshot {
 
 struct ControllerParams {
     double kp_psi = 6e6;
-    double kp_u = 5e5;
+    double kp_u = 6e5;
+    double ki_u = 4500;
     double kd_psi = 6e7;
 
 };
 
 struct VesselSnapshot {
     double t;
+    ActuatorCommands actuator_references;
+    ActuatorCommands actuator_commands;
+    ActuatorCommands actuator_states;
+    Reference reference;
     vec12 x;
     arma::vec6 tau;
 };
@@ -61,6 +66,7 @@ struct VesselSnapshot {
 // Utilities
 double deg2rad(double deg);
 bool inrange(double value, double range_min, double range_max);
+bool closeto(double value, double desired);
 double ssa(double angle);
 arma::mat66 join33blocks(arma::mat33 A, arma::mat33 B, arma::mat33 C, arma::mat33 D);
 arma::mat44 join22blocks(arma::mat33 A, arma::mat33 B, arma::mat33 C, arma::mat33 D);

@@ -1,6 +1,7 @@
 #include "thrust_allocator.hpp"
 #include "actuator_io.hpp"
 #include "common.hpp"
+#include <any>
 #include <armadillo>
 #include <cstddef>
 
@@ -87,6 +88,18 @@ const arma::vec6 ThrustAllocator::Tau() const {
         tau += tt.Tau();
     }
     return tau;
-} 
+}
+
+// Ideally maybe calculate max thrust force in -x direction instead ...
+bool ThrustAllocator::AntiWindupU() const {
+    bool anti_windup_u{};
+    for (const auto& mp : main_propulsors_) {
+        if (common::closeto(mp.Rpm(), mp.MaxRpm())) {
+            return true;
+        }
+    }
+    return false;
+
+}
 
 } // namespace allocator

@@ -3,6 +3,7 @@
 #include <armadillo>
 #include <cmath>
 #include <math.h>
+#include <system_error>
 
 namespace common {
 
@@ -16,6 +17,12 @@ bool inrange(double value, double range_min, double range_max) {
     Helper to make code more readable
     */
     return range_min < value && value < range_max;
+}
+
+bool closeto(double value, double desired) {
+    const double lo = desired * 0.99;
+    const double hi = desired * 1.01;
+    return (lo < value && value < hi);
 }
 
 // Smallest signed angle [rad]

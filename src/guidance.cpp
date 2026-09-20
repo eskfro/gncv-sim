@@ -8,15 +8,17 @@ void Guidance::Step(double dt) {
     
     switch (guidance_mode_) {
 
-    case common::GuidanceMode::HeadingHold:
+    case common::GuidanceMode::HeadingHold: {
 
         reference_.guidance_mode = common::GuidanceMode::HeadingHold;
+
+        const double psi_d = 40.0;
     
         // Heading reference
         if (common::inrange(t, 0, 120)) {
-            reference_.psi_d = common::deg2rad(45);
+            reference_.psi_d = common::deg2rad(psi_d);
         } else if (common::inrange(t, 120, 240)) {
-            reference_.psi_d = -common::deg2rad(45);
+            reference_.psi_d = -common::deg2rad(psi_d);
         } else {
             reference_.psi_d = 0;
         }
@@ -29,7 +31,7 @@ void Guidance::Step(double dt) {
         time_ += dt;
 
         break;
-    
+    }
     default:
         std::cout << "This should not be printed\n";
     }   

@@ -12,7 +12,7 @@ class Guidance {
 public:     
     void Step(double dt);
 
-    common::Reference Reference() { return reference_; }
+    const common::Reference& Reference() const { return reference_; }
 
 private:
     double time_{};

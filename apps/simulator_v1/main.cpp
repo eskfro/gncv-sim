@@ -19,6 +19,7 @@ std::atomic<bool> running{true};
 
 void print_every_second(int n);
 void write_to_csv(std::vector<common::VesselSnapshot>& snapshots);
+void simulator_v1_plotter();
 
 // Simulation params
 static constexpr int kSimTimeSeconds = 240;
@@ -45,6 +46,10 @@ int main() {
     // Store simulation
     write_to_csv(snapshots);
     std::cout << "Simulation successfully saved in simdata/simulator_v1/\n";
+
+    // Plot the result
+    simulator_v1_plotter();
+
     return 0;
 
 }
@@ -88,4 +93,18 @@ void print_every_second(int n) {
     if (n % n_per_second != 0) return;
     int time_seconds = n / n_per_second;
     std::cout << time_seconds << " ";
+}
+
+// Starts the app
+void simulator_v1_plotter() {
+    const std::filesystem::path script = "apps/simulator_v1_plotter/main.py";
+    if (!std::filesystem::exists(script)) {
+        std::cerr << "Could not find " << script << " (run from the project root)\n";
+        return;
+    }
+
+    const std::string cmd = "python3 " + script.string();
+    if (std::system(cmd.c_str()) != 0) {
+        std::cerr << "Plotter exited with an error\n";
+    }
 }
