@@ -155,7 +155,7 @@ void NorthArrow(ImDrawList* dl, ImVec2 top_right) {
 
 void DrawSidePanel(AppState& state, const Rect& rect) {
     PlaceNextWindow(rect);
-    ImGui::Begin("playback-2d", nullptr, kFixedWindow);
+    ImGui::Begin("playback_2d", nullptr, kFixedWindow);
     if (ImGui::CollapsingHeader("Files", ImGuiTreeNodeFlags_DefaultOpen)) FilesSection(state);
     if (ImGui::CollapsingHeader("Telemetry", ImGuiTreeNodeFlags_DefaultOpen)) TelemetrySection(state);
     if (ImGui::CollapsingHeader("View", ImGuiTreeNodeFlags_DefaultOpen)) ViewSection(state);

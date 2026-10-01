@@ -46,7 +46,7 @@ void SetupState(AppState& state, const Options& options) {
 
     if (file.empty() && !state.files.empty()) file = state.files.front();  // newest
     if (!file.empty() && !state.Load(file)) {
-        std::fprintf(stderr, "playback-2d: %s\n", state.load_error.c_str());
+        std::fprintf(stderr, "playback_2d: %s\n", state.load_error.c_str());
     }
 }
 
@@ -80,22 +80,22 @@ bool SaveScreenshot(SDL_Renderer* renderer, const std::filesystem::path& path) {
 
 int Run(const Options& options) {
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) {
-        std::fprintf(stderr, "playback-2d: SDL_Init failed: %s\n", SDL_GetError());
+        std::fprintf(stderr, "playback_2d: SDL_Init failed: %s\n", SDL_GetError());
         return 1;
     }
 
     const auto window_flags = static_cast<SDL_WindowFlags>(SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-    SDL_Window* window = SDL_CreateWindow("playback-2d", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+    SDL_Window* window = SDL_CreateWindow("playback_2d", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                                           kWindowWidth, kWindowHeight, window_flags);
     if (window == nullptr) {
-        std::fprintf(stderr, "playback-2d: SDL_CreateWindow failed: %s\n", SDL_GetError());
+        std::fprintf(stderr, "playback_2d: SDL_CreateWindow failed: %s\n", SDL_GetError());
         SDL_Quit();
         return 1;
     }
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
     if (renderer == nullptr) renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
     if (renderer == nullptr) {
-        std::fprintf(stderr, "playback-2d: SDL_CreateRenderer failed: %s\n", SDL_GetError());
+        std::fprintf(stderr, "playback_2d: SDL_CreateRenderer failed: %s\n", SDL_GetError());
         SDL_DestroyWindow(window);
         SDL_Quit();
         return 1;
@@ -153,7 +153,7 @@ int Run(const Options& options) {
         state.clock.Update(std::min(dt, kMaxFrameDt));
 
         const std::string wanted_title =
-            state.recording ? "playback-2d - " + state.loaded_file.filename().string() : "playback-2d";
+            state.recording ? "playback_2d - " + state.loaded_file.filename().string() : "playback_2d";
         if (wanted_title != title) {
             title = wanted_title;
             SDL_SetWindowTitle(window, title.c_str());
@@ -175,7 +175,7 @@ int Run(const Options& options) {
             if (SaveScreenshot(renderer, options.screenshot)) {
                 std::printf("Saved %s\n", options.screenshot.c_str());
             } else {
-                std::fprintf(stderr, "playback-2d: screenshot failed: %s\n", SDL_GetError());
+                std::fprintf(stderr, "playback_2d: screenshot failed: %s\n", SDL_GetError());
                 exit_code = 1;
             }
             running = false;

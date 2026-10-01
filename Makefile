@@ -10,8 +10,8 @@ v1:
 	./build/sim2d
 
 playback:
-	cmake --build build -j8 --target playback-2d
-	./build/playback-2d
+	cmake --build build -j8 --target playback_2d
+	./build/playback_2d
 
 clean-v1:
 	rm -f simdata/simulator_v1/*.csv

@@ -35,7 +35,7 @@ add_executable(simulator_v1
 target_link_libraries(simulator_v1 PRIVATE gncv-sim-core)
 
 # Apps with their own CMakeLists.txt
-add_subdirectory(apps/playback-2d)
+add_subdirectory(apps/playback_2d)
 
 if(BUILD_TESTING)
     add_executable(test_common

@@ -1,4 +1,4 @@
-# playback-2d
+# playback_2d
 
 Plays back simulator_v1 recordings (`simdata/simulator_v1/*.csv`) as a top-down 2D animation. You see the vessel hull with its rudder, the track, the heading reference and the velocity vector. Playback runs in real time (1x) by default, and the speed can be changed from the GUI.
 
@@ -8,9 +8,9 @@ Linux only. Built with SDL2 and [Dear ImGui](https://github.com/ocornut/imgui).
 ```sh
 sudo apt install libsdl2-dev        # once
 cmake -B build && cmake --build build -j8
-make playback                        # or ./build/playback-2d [FILE.csv | DIR]
+make playback                        # or ./build/playback_2d [FILE.csv | DIR]
 ```
-With no argument the newest csv in `simdata/simulator_v1` is opened. Run `./build/playback-2d --help` to list all options (`--speed`, `--follow`, `--loop`, `--ui-scale`, `--screenshot`).
+With no argument the newest csv in `simdata/simulator_v1` is opened. Run `./build/playback_2d --help` to list all options (`--speed`, `--follow`, `--loop`, `--ui-scale`, `--screenshot`).
 
 Dear ImGui is downloaded by CMake at configure time. To build offline, use `-DFETCHCONTENT_SOURCE_DIR_IMGUI=/path/to/imgui`. Without SDL2 the GUI is skipped, but the model library and its tests still build.
 
@@ -40,7 +40,7 @@ src/
   panels.*            ImGui panels: files, telemetry, view, playback bar, viewport
   app_state.*         state shared by the panels
   app.*, main.cpp     SDL window, event loop, command line
-tests/                unit tests for the GUI-free part (playback-2d-model)
+tests/                unit tests for the GUI-free part (playback_2d_model)
 ```
 The core in `src/` is not used. The app only reads the csv files.
 

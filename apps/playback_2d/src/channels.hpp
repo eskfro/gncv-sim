@@ -2,7 +2,7 @@
 // ============================================================================
 // Knowledge about the simulator_v1 csv format, kept in one place.
 //
-// Everything else in playback-2d looks columns up by name, so supporting a new
+// Everything else in playback_2d looks columns up by name, so supporting a new
 // column (or a new simulator) means editing this file and adding a layer or
 // panel that uses it.
 // ============================================================================

@@ -1,6 +1,6 @@
-// playback-2d: replays simulator_v1 csv files as a top-down 2D animation.
+// playback_2d: replays simulator_v1 csv files as a top-down 2D animation.
 //
-// Usage: playback-2d [FILE.csv | DIR] [options]   (see --help)
+// Usage: playback_2d [FILE.csv | DIR] [options]   (see --help)
 
 #include <cstdio>
 #include <cstdlib>
@@ -12,7 +12,7 @@ namespace {
 
 void PrintUsage() {
     std::printf(
-        "Usage: playback-2d [FILE.csv | DIR] [options]\n"
+        "Usage: playback_2d [FILE.csv | DIR] [options]\n"
         "\n"
         "Plays back a simulator_v1 recording. With no argument the newest csv in\n"
         "simdata/simulator_v1 is opened.\n"
@@ -61,7 +61,7 @@ int main(int argc, char** argv) {
         } else if (!arg.empty() && arg[0] != '-' && options.input.empty()) {
             options.input = arg;
         } else {
-            std::fprintf(stderr, "playback-2d: bad argument '%s'\n\n", arg.c_str());
+            std::fprintf(stderr, "playback_2d: bad argument '%s'\n\n", arg.c_str());
             PrintUsage();
             return 2;
         }
