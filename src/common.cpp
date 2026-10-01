@@ -1,5 +1,6 @@
 #include "common.hpp"
 
+#include <algorithm>
 #include <armadillo>
 #include <cmath>
 #include <math.h>
@@ -256,6 +257,84 @@ arma::mat66 D_n(const arma::vec6& coeffs, const arma::vec6& nu) {
 // coeffs = [X_u, Y_v, Z_w, K_p, M_q, N_r]  (negative values, same convention as D_n)
 arma::mat66 D_l(const arma::vec6 &coeffs) {
     return -arma::diagmat(coeffs);
+}
+
+// Quaternion product q ⊗ p (Hamilton)
+quat quat_mult(const quat& q, const quat& p) {
+    const double qw = q(0), qx = q(1), qy = q(2), qz = q(3);
+    const double pw = p(0), px = p(1), py = p(2), pz = p(3);
+
+    return quat{
+        qw*pw - qx*px - qy*py - qz*pz,
+        qw*px + qx*pw + qy*pz - qz*py,
+        qw*py - qx*pz + qy*pw + qz*px,
+        qw*pz + qx*py - qy*px + qz*pw
+    };
+}
+
+// Conjugate, equal to the inverse for unit quaternions
+quat quat_conj(const quat& q) {
+    return quat{q(0), -q(1), -q(2), -q(3)};
+}
+
+// Normalize to unit length, and keep w >= 0 so q and -q
+// (same rotation) are not mixed
+quat quat_normalize(const quat& q) {
+    const quat qn = q / arma::norm(q, 2);
+    return qn(0) < 0.0 ? quat(-qn) : qn;
+}
+
+// Rotation vector -> quaternion
+// q = (cos(|dtheta|/2), sin(|dtheta|/2) * dtheta/|dtheta|)
+// Used for error injection q = q ⊗ exp(dtheta) and gyro integration exp(w*dt)
+quat quat_exp(const arma::vec3& dtheta) {
+    const double angle = arma::norm(dtheta, 2);
+
+    // Small angle approximation avoids division by ~0
+    if (angle < 1e-8) {
+        return quat_normalize(quat{1.0, 0.5*dtheta(0), 0.5*dtheta(1), 0.5*dtheta(2)});
+    }
+
+    const arma::vec3 v = std::sin(0.5 * angle) / angle * dtheta;
+    return quat{std::cos(0.5 * angle), v(0), v(1), v(2)};
+}
+
+// Rotation matrix from quaternion (body -> ned)
+// R = (w^2 - v'v)I + 2vv' + 2wS(v)
+arma::mat33 R_quat(const quat& q) {
+    const double w = q(0);
+    const arma::vec3 v = q.subvec(1, 3);
+
+    return (w*w - arma::dot(v, v)) * arma::eye(3, 3)
+         + 2.0 * v * v.t()
+         + 2.0 * w * S(v);
+}
+
+// Euler angles -> quaternion, zyx convention (same as R_zyx)
+// a = [phi, theta, psi]  (roll, pitch, yaw) [rad]
+quat quat_from_euler(const arma::vec3& a) {
+    const double cphi = std::cos(0.5 * a(0)), sphi = std::sin(0.5 * a(0));
+    const double cth  = std::cos(0.5 * a(1)), sth  = std::sin(0.5 * a(1));
+    const double cpsi = std::cos(0.5 * a(2)), spsi = std::sin(0.5 * a(2));
+
+    return quat_normalize(quat{
+        cpsi*cth*cphi + spsi*sth*sphi,
+        cpsi*cth*sphi - spsi*sth*cphi,
+        cpsi*sth*cphi + spsi*cth*sphi,
+        spsi*cth*cphi - cpsi*sth*sphi
+    });
+}
+
+// Quaternion -> euler angles [phi, theta, psi], zyx convention
+// Singular at theta = +-pi/2 (gimbal lock)
+arma::vec3 quat_to_euler(const quat& q) {
+    const double w = q(0), x = q(1), y = q(2), z = q(3);
+
+    const double phi   = std::atan2(2.0*(w*x + y*z), 1.0 - 2.0*(x*x + y*y));
+    const double theta = std::asin(std::clamp(2.0*(w*y - x*z), -1.0, 1.0));
+    const double psi   = std::atan2(2.0*(w*z + x*y), 1.0 - 2.0*(y*y + z*z));
+
+    return arma::vec3{phi, theta, psi};
 }
 
 } // namespace common

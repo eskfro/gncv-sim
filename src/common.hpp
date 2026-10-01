@@ -17,10 +17,17 @@ constexpr double kKnots2Ms = 0.514444;
 // Probably dont need this
 enum class Frames : int {Body, Ned, Enu};
 
-// Custom vector and matrix definitionss
+// Custom vectors
 using vec12 = arma::Col<double>::fixed<12>;
+using vec15 = arma::Col<double>::fixed<15>;
+using vec16 = arma::Col<double>::fixed<16>;
+
+// Custom matrices
 using mat24 = arma::Mat<double>::fixed<2, 4>;
 using mat42 = arma::Mat<double>::fixed<4, 2>;
+using mat1212 = arma::Mat<double>::fixed<12, 12>;
+using mat1515 = arma::Mat<double>::fixed<15, 15>;
+using mat1512 = arma::Mat<double>::fixed<15, 12>;
 
 enum class GuidanceMode : uint8_t {HeadingHold, PositionHold, WaypointTracking};
 
@@ -46,6 +53,16 @@ struct ImuSnapshot {
     double r;
 };
 
+struct ImuParams {
+    double sigma_a{};   // acceleration white noise standard deviation
+    double sigma_w{};   // gyro white noise standard deviation
+    double sigma_aw{};  // acceleration bias driving noise
+    double sigma_ww{};  // gyro bias driving noise
+    double p_a{};       // inverse time constant acceleration
+    double p_w{};       // inverse time constant gyro
+    arma::vec3 g = {0, 0, 9.81};    // apple vector
+};
+
 struct ControllerParams {
     double kp_psi = 6e6;
     double kp_u = 6e5;
@@ -64,6 +81,19 @@ struct VesselSnapshot {
     arma::vec6 tau;
 };
 
+// Quaternion functions
+// q = (w, x, y, z) : unit quaternion, Hamilton convention (scalar first)
+// R_quat(q) rotates body -> ned, same direction as R_zyx
+// Reference: Sola, "Quaternion kinematics for the error-state Kalman filter"
+using quat = arma::vec4;
+
+quat quat_mult(const quat& q, const quat& p);
+quat quat_conj(const quat& q);
+quat quat_normalize(const quat& q);
+quat quat_exp(const arma::vec3& dtheta);
+arma::mat33 R_quat(const quat& q);
+quat quat_from_euler(const arma::vec3& a);
+arma::vec3 quat_to_euler(const quat& q);
 
 // Utilities
 double deg2rad(double deg);

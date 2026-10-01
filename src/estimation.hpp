@@ -41,8 +41,69 @@ private:
 };
 
 /*
-Estimate init state from two first measurements on a cv model
+Error state kalman filter
+
+x = (p, v, q, a_b, w_b) : (position, velocity, orientation, acc bias, gyro bias)
+nominal state           : best running guess (dim = 16)
+error state             : how strong the nominal state is, this what it estimates (dim = 15)
+
+Why ESKF
+Need extra state since covariance matrix dimension is different
+because of how attitude is represented as four numbers in a quaternion.
+So the error state is one less dimension since we assume
+dq = (1, dTheta / 2), which makes P well behaved :)
+Also since the error state is often small the linearization
+is an accurate representation.
+
 */
-void get_init_cv_state(double meas0, double meas1, int ekf_params);
+class Eskf15 {
+public:
+    Eskf15() = default;
+
+    // This functions runs everytime a new IMU measurement arrives
+    void PredictState(double dt, const arma::vec3& acc_meas, const arma::vec3& gyro_meas, const common::ImuParams& p);
+
+    // This function runs everytime a position fix arrives, for example Gnss measurement
+    void CorrectStateFromMeasurement(double dt, const arma::vec3& pos_meas, const arma::mat33& R_meas);
+
+
+private:
+    // Nominal state (high rate)
+    arma::vec3 p_{};     // IMU position
+    arma::vec3 v_{};     // IMU velocity
+    common::quat q_{};   // attitude, rotating body to world
+    arma::vec3 a_b_{};   // acceleration bias
+    arma::vec3 w_b_{};   // gyro bias
+
+    // Error state
+    arma::vec3 delta_p_{};
+    arma::vec3 delta_v_{};
+    arma::vec3 delta_theta_{};
+    arma::vec3 delta_a_b_{};
+    arma::vec3 delta_w_b_{};
+
+    common::vec16 x_nom_{};
+    /*
+    0-2     :   p, imu position
+    3-5     :   v, imu velocity
+    6-9     :   q, attitude quaternion
+    10-12   :   a_b, acceleration bias
+    13-15   :   w_b, gyro bias 
+    */
+
+
+    common::vec15 delta_x_{};
+    /*
+    0-2     :   delta_p, imu position
+    3-5     :   delta_v, imu velocity
+    6-8     :   delta_theta, euler angles
+    9-11    :   delta_a_b, acceleration bias
+    12-14   :   delta_w_b, gyro bias 
+    */
+
+    common::mat1515 P_{};
+    
+};
+
 
 } // namespace estimation

@@ -1,8 +1,12 @@
 # gncv-sim
-Guidance, Navigation and Control of Vehicles simulator
+Guidance, Navigation and Control of Vehicles simulator.
+This is a vessel simulator made for learning the concepts and theory in TTK4190 and TTK4250.
 
 ### Dependencies
-- Armadillo (vectors and matrices)
+- Armadillo
+- CMake
+- CTest
+- Python (3.14)
 
 ### Simulator v1
 Simple vessel simulator. The data is saved in a csv-file.
