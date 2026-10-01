@@ -1,4 +1,4 @@
-.PHONY: 2 v1
+.PHONY: 2d v1 playback clean-v1 test
 
 v1:
 	cmake --build build -j8
@@ -8,6 +8,10 @@ v1:
 2d:
 	chmod +x build/sim2d
 	./build/sim2d
+
+playback:
+	cmake --build build -j8 --target playback_2d
+	./build/playback_2d
 
 clean-v1:
 	rm -f simdata/simulator_v1/*.csv
