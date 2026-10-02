@@ -53,8 +53,9 @@ Other calculations tied to the physical vessel
 */
 class Vessel {
 public:
-    Vessel();
+    Vessel() = default;
 
+    void Init();
     void Step(double dt);
 
     // Forces: tau = tau_wind + tau_wave + tau_hyd + tau_hs + tau_control

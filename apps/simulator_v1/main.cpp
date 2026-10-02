@@ -17,6 +17,7 @@
 
 std::atomic<bool> running{true};
 
+// Declare functions
 void print_every_ten_seconds(int n);
 void write_to_csv(std::vector<common::VesselSnapshot>& snapshots);
 void simulator_v1_plotter();
@@ -28,13 +29,16 @@ static const int N = std::lround(kSimTimeSeconds / dt);
 
 int main() {
 
-    // define things
+    // Init
     int n = 0;
     std::vector<common::VesselSnapshot> snapshots;
-    vessel::Vessel vessel{};
-    std::cout << "Starting simulation\n";
+    snapshots.reserve(N);
 
-    // Simulate
+    vessel::Vessel vessel{};
+    vessel.Init();
+    snapshots.push_back(vessel.Snapshot());
+
+    std::cout << "Starting simulation\n";
     while (n < N) {
         vessel.Step(dt);
         snapshots.push_back(vessel.Snapshot());

@@ -23,12 +23,6 @@ add_library(gncv-sim-core
 target_include_directories(gncv-sim-core PUBLIC src ${ARMADILLO_INCLUDE_DIRS})
 target_link_libraries(gncv-sim-core PUBLIC ${ARMADILLO_LIBRARIES})
 
-add_executable(sim2d
-    apps/sim2d/main.cpp
-    apps/sim2d/sim2d.cpp
-)
-target_link_libraries(sim2d PRIVATE gncv-sim-core)
-
 add_executable(simulator_v1
     apps/simulator_v1/main.cpp
 )

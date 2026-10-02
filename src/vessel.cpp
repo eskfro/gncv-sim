@@ -16,7 +16,7 @@ Reference model ------------> Course autopilot -------------> Marine craft -----
 */  
 namespace vessel {
 
-Vessel::Vessel() {
+void Vessel::Init() {
     dynamics_.Init({});
     thrust_allocator_.Init();
 }
