@@ -16,16 +16,7 @@ void Guidance::Step(double dt) {
         const double psi_d = 30.0;
         const double sine = 60 * std::sin(t * 2 * M_PI / 80);
     
-        // Heading reference generator
-        if (common::inrange(t, 0, 60)) {
-            reference_.psi_d = common::deg2rad(psi_d);
-        } else if (common::inrange(t, 0, 0)) {
-            reference_.psi_d = -common::deg2rad(psi_d);
-        } else if (common::inrange(t, 60, 240)) {
-            reference_.psi_d = common::deg2rad(sine);
-        } else {
-            reference_.psi_d = common::deg2rad(-180);
-        }
+        reference_.psi_d = common::heaviside(t, 90, common::deg2rad(60));
 
         // Speed reference
         reference_.u_d = 14 * common::kKnots2Ms;

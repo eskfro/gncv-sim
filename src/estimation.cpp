@@ -97,20 +97,31 @@ void CvFilter::GetInitCvState(double dt, arma::vec2& pos_meas_1, arma::vec2& pos
     P_ = common::join22blocks(P11, P12, P21, P22);
 }
 
-void Eskf15::PredictState(double dt, const arma::vec3& acc_meas, const arma::vec3& gyro_meas, const common::ImuParams& p) {
+void Eskf15::Init() {
+    const arma::vec3 init_angles = {0, 0, 0};
+
+    // Init states
+    q_ = common::quat_from_euler(init_angles);
+    q_ = common::quat_normalize(q_);
+    P_ = arma::eye(15, 15);
+}
+
+void Eskf15::PredictStateFromImu(double dt, const arma::vec3& acc_meas, const arma::vec3& gyro_meas, const common::ImuParams& p) {
     /*
     Uses the latest acceleration and gyro measurements to move the best guess
     of the state forward and works out the new uncertainty.
-    
+
+    The measurements are raw measurements from the IMU. I might change this such that the IMU
+    handles the correction but idk. 
     */
     const arma::mat33 I3 = arma::eye(3, 3);
 
     // === Nominal state dynamics ===
 
     // Clean Imu readings and rotate
-    arma::vec3 a_body = acc_meas - a_b_;
-    arma::vec3 w =  gyro_meas - w_b_;
-    arma::mat33 R = common::R_quat(q_);
+    arma::vec3 a_body = acc_correction_ * (acc_meas - a_b_ );
+    arma::vec3 w = gyro_correction_ * ( gyro_meas - w_b_ );
+    arma::mat33 R = common::quat_to_rotmat(q_);
     arma::vec3 a_world = R * a_body + p.g;
 
     // Nominal state update
@@ -121,7 +132,6 @@ void Eskf15::PredictState(double dt, const arma::vec3& acc_meas, const arma::vec
     a_b_ = std::exp(-p.p_a * dt) * a_b_;
     w_b_ = std::exp(-p.p_w * dt) * w_b_;
 
-
     // === Error state dynamics ===
 
     // delta_x' = A * delta_x + G * n,   n ~ N(0, Q)
@@ -131,9 +141,9 @@ void Eskf15::PredictState(double dt, const arma::vec3& acc_meas, const arma::vec
     common::mat1515 A{}; // Big matrix
     A.submat(0, 3, 2, 5) = I3;
     A.submat(3, 6, 5, 8) = - R * common::S(a_body);
-    A.submat(3, 9, 5, 11) = - R;
+    A.submat(3, 9, 5, 11) = - R * acc_correction_;
     A.submat(6, 6, 8, 8) = - common::S(w);
-    A.submat(6, 12, 8, 14) = - I3;
+    A.submat(6, 12, 8, 14) = - gyro_correction_;
     A.submat(9, 9, 11, 11) = - p.p_a * I3;
     A.submat(12, 12, 14, 14) = - p.p_w * I3; 
     
@@ -144,8 +154,8 @@ void Eskf15::PredictState(double dt, const arma::vec3& acc_meas, const arma::vec
     G.submat(12, 9, 14, 11) = I3;
 
     common::mat1212 Q{};
-    Q.submat(0, 0, 2, 2) = std::pow(p.sigma_a, 2) * I3;
-    Q.submat(3, 3, 5, 5) = std::pow(p.sigma_w, 2) * I3;
+    Q.submat(0, 0, 2, 2) = std::pow(p.sigma_a, 2) * acc_correction_ * acc_correction_.t();
+    Q.submat(3, 3, 5, 5) = std::pow(p.sigma_w, 2) * gyro_correction_ * gyro_correction_.t();
     Q.submat(6, 6, 8, 8) = std::pow(p.sigma_aw, 2) * I3;
     Q.submat(9, 9, 11, 11) = std::pow(p.sigma_ww, 2) * I3;
 
@@ -168,8 +178,55 @@ void Eskf15::PredictState(double dt, const arma::vec3& acc_meas, const arma::vec
     P_ = 0.5 * (P_ + P_.t());   // keep it symmetric
 }
 
-void Eskf15::CorrectStateFromMeasurement(double dt, const arma::vec3& pos_meas, const arma::mat33& R_meas) {
-    std::cout << "TODO\n";
+void Eskf15::CorrectStateFromGnss(double dt, const arma::vec3& pos_meas, const arma::mat33& R_meas) {
+    const arma::mat33 R_q = common::quat_to_rotmat(q_);
+    const common::mat1515 I = arma::eye(15, 15);
+
+    // Compose the measurement jacobian
+    arma::mat H(3, 15, arma::fill::zeros);
+    // [z_x, z_y, z_z] 
+    H.submat(0, 0, 2, 2) = arma::eye(3, 3); // delta_p
+    H.submat(0, 6, 2, 8) = - R_q * common::S(lever_arm_); // delta_theta
+
+    // Innovation covariance
+    const arma::mat33 S = H * P_ * H.t() + R_meas;
+
+    // Kalman gain
+    arma::mat K(15, 3, arma::fill::zeros);
+    K = P_ * H.t() * S.i();
+
+    // Update states
+    const arma::vec3 y = pos_meas - (p_ + R_q * lever_arm_);
+    delta_x_ = K * y;
+    P_ = (I - K*H) * P_ * (I - K*H).t() + K * R_meas * K.t();
+
+    InjectErrorState();
+    CovarianceReset();
+
+    delta_x_.zeros();
+}
+
+void Eskf15::InjectErrorState() {
+    const arma::vec4 q_err = common::quat_exp(delta_x_.subvec(6, 8));
+
+    p_ += delta_x_.subvec(0, 2);
+    v_ += delta_x_.subvec(3, 5);
+    q_ = common::quat_normalize(common::quat_mult(q_, q_err));
+    a_b_ += delta_x_.subvec(9, 11);
+    w_b_ += delta_x_.subvec(12, 14);
+
+}
+
+void Eskf15::CovarianceReset() {
+    const arma::mat33 I3 = arma::eye(3, 3);
+
+    // ESKF covariance reset (theorem 6.5.1)
+    common::mat1515 G{};
+    G.submat(0, 0, 5, 5) = arma::eye(6, 6);
+    G.submat(6, 6, 8, 8) = I3 - common::S(0.5 * delta_x_.subvec(6, 8));
+    G.submat(9, 9, 14, 14) = arma::eye(6, 6);
+
+    P_ = G * P_ * G.t();
 }
 
 } // namespace estimation

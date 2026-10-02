@@ -36,7 +36,7 @@ int main() {
     const common::quat q_identity{1.0, 0.0, 0.0, 0.0};
 
     // Same rotation as the euler angle matrix
-    if (!arma::approx_equal(common::R_quat(q), common::R_zyx(euler), "absdiff", 1e-12)) return 1;
+    if (!arma::approx_equal(common::quat_to_rotmat(q), common::R_zyx(euler), "absdiff", 1e-12)) return 1;
 
     // Euler round trip
     if (!arma::approx_equal(common::quat_to_euler(q), euler, "absdiff", 1e-12)) return 1;
@@ -46,12 +46,12 @@ int main() {
     if (!arma::approx_equal(q_qconj, q_identity, "absdiff", 1e-12)) return 1;
 
     // Composition matches matrix product: R(q ⊗ p) = R(q)R(p)
-    const arma::mat33 R_qp = common::R_quat(common::quat_mult(q, p));
-    if (!arma::approx_equal(R_qp, common::R_quat(q) * common::R_quat(p), "absdiff", 1e-12)) return 1;
+    const arma::mat33 R_qp = common::quat_to_rotmat(common::quat_mult(q, p));
+    if (!arma::approx_equal(R_qp, common::quat_to_rotmat(q) * common::quat_to_rotmat(p), "absdiff", 1e-12)) return 1;
 
     // 90 deg about z maps x-axis to y-axis
     const common::quat q_z90 = common::quat_exp(arma::vec3{0.0, 0.0, arma::datum::pi / 2.0});
-    const arma::vec3 x_rotated = common::R_quat(q_z90) * arma::vec3{1.0, 0.0, 0.0};
+    const arma::vec3 x_rotated = common::quat_to_rotmat(q_z90) * arma::vec3{1.0, 0.0, 0.0};
     if (!arma::approx_equal(x_rotated, arma::vec3{0.0, 1.0, 0.0}, "absdiff", 1e-12)) return 1;
 
     // Small angle branch stays unit length

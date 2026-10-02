@@ -301,7 +301,7 @@ quat quat_exp(const arma::vec3& dtheta) {
 
 // Rotation matrix from quaternion (body -> ned)
 // R = (w^2 - v'v)I + 2vv' + 2wS(v)
-arma::mat33 R_quat(const quat& q) {
+arma::mat33 quat_to_rotmat(const quat& q) {
     const double w = q(0);
     const arma::vec3 v = q.subvec(1, 3);
 
@@ -335,6 +335,14 @@ arma::vec3 quat_to_euler(const quat& q) {
     const double psi   = std::atan2(2.0*(w*z + x*y), 1.0 - 2.0*(y*y + z*z));
 
     return arma::vec3{phi, theta, psi};
+}
+
+double heaviside(double t, double t_step, double value) {
+    if (common::inrange(t, 0, t_step)) {
+        return 0;
+    } else {
+        return value;
+    }
 }
 
 } // namespace common

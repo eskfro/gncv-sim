@@ -60,49 +60,45 @@ class Eskf15 {
 public:
     Eskf15() = default;
 
+    void Init();
+    
     // This functions runs everytime a new IMU measurement arrives
-    void PredictState(double dt, const arma::vec3& acc_meas, const arma::vec3& gyro_meas, const common::ImuParams& p);
-
+    void PredictStateFromImu(double dt, const arma::vec3& acc_meas, const arma::vec3& gyro_meas, const common::ImuParams& p);
+    
     // This function runs everytime a position fix arrives, for example Gnss measurement
-    void CorrectStateFromMeasurement(double dt, const arma::vec3& pos_meas, const arma::mat33& R_meas);
-
-
+    void CorrectStateFromGnss(double dt, const arma::vec3& pos_meas, const arma::mat33& R_meas);
+    
+    
 private:
+    void InjectErrorState();
+    void CovarianceReset();
+
+    // Zero for now ...
+    arma::vec3 lever_arm_{};  
+
     // Nominal state (high rate)
     arma::vec3 p_{};     // IMU position
     arma::vec3 v_{};     // IMU velocity
     common::quat q_{};   // attitude, rotating body to world
     arma::vec3 a_b_{};   // acceleration bias
     arma::vec3 w_b_{};   // gyro bias
-
-    // Error state
-    arma::vec3 delta_p_{};
-    arma::vec3 delta_v_{};
-    arma::vec3 delta_theta_{};
-    arma::vec3 delta_a_b_{};
-    arma::vec3 delta_w_b_{};
-
-    common::vec16 x_nom_{};
-    /*
-    0-2     :   p, imu position
-    3-5     :   v, imu velocity
-    6-9     :   q, attitude quaternion
-    10-12   :   a_b, acceleration bias
-    13-15   :   w_b, gyro bias 
-    */
-
-
+    
+    
     common::vec15 delta_x_{};
     /*
     0-2     :   delta_p, imu position
     3-5     :   delta_v, imu velocity
-    6-8     :   delta_theta, euler angles
+    6-8     :   delta_theta, rotation vector
     9-11    :   delta_a_b, acceleration bias
     12-14   :   delta_w_b, gyro bias 
     */
 
     common::mat1515 P_{};
-    
+
+    // Mounting position correction matrices
+    arma::mat33 acc_correction_ = arma::eye(3, 3);
+    arma::mat33 gyro_correction_ = arma::eye(3, 3);
+
 };
 
 

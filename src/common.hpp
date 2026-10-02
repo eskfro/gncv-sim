@@ -91,7 +91,7 @@ quat quat_mult(const quat& q, const quat& p);
 quat quat_conj(const quat& q);
 quat quat_normalize(const quat& q);
 quat quat_exp(const arma::vec3& dtheta);
-arma::mat33 R_quat(const quat& q);
+arma::mat33 quat_to_rotmat(const quat& q);
 quat quat_from_euler(const arma::vec3& a);
 arma::vec3 quat_to_euler(const quat& q);
 
@@ -103,12 +103,13 @@ double ssa(double angle);
 arma::mat66 join33blocks(arma::mat33 A, arma::mat33 B, arma::mat33 C, arma::mat33 D);
 arma::mat44 join22blocks(arma::mat33 A, arma::mat33 B, arma::mat33 C, arma::mat33 D);
 double U(const arma::vec6& nu);
+double heaviside(double t, double t_step, double value);
 
 // Numerical solvers
 vec12 solver_12d_rk4(std::function<vec12(vec12, double)> f, vec12 x, double t, double dt);
 double first_order_lowpass(double dt, double time_constant, double command, double curr);
 
-// Matrices :)
+// Matrices
 arma::mat33 R_zyx(const arma::vec3& a);
 arma::mat33 T_zyx(const arma::vec3& a);
 arma::mat66 H(const arma::vec3& r);
@@ -119,8 +120,7 @@ arma::mat33 I_cg(double m, double r44, double r55, double r66);
 arma::mat66 M_rb(double m, const arma::mat33& I0, const arma::vec3& r_cg);
 arma::mat66 M_a(double m, double i_x, double i_y, double i_z);
 arma::mat66 C_rb(double m, const arma::mat33& I0, const arma::vec3& r_cg, const arma::vec6& nu);
-arma::vec6 g(double w, double b, const arma::vec3& r_cg,
-    const arma::vec3& r_cb, const arma::vec6& eta);
+arma::vec6 g(double w, double b, const arma::vec3& r_cg, const arma::vec3& r_cb, const arma::vec6& eta);
 arma::mat66 D_n(const arma::vec6& coeffs, const arma::vec6& nu);
 arma::mat66 D_l(const arma::vec6& coeffs);
 
