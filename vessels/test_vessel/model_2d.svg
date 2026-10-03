@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  test_vessel, top view (model_2d.svg)
+
+  Body frame in meters: x forward (right), y starboard (down). Origin midships.
+  Same size as vessel::VesselParams in src/dynamics.hpp: length 70 m, breadth 10 m,
+  and the same deck outline as model_3d.obj.
+  Groups named in lib/vessel_model/parts.hpp move with the csv: rudder (delta_r).
+  Format notes: lib/vessel_model/model_2d.hpp
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-39 -7 78 14" width="780" height="140">
+  <g id="hull">
+    <path d="M -35,-4.4 L -30,-5 L 12,-5 C 24,-5 31,-3.2 35,0 C 31,3.2 24,5 12,5 L -30,5 L -35,4.4 Z"
+          fill="#738573" stroke="#1a2642" stroke-width="0.3"/>
+  </g>
+
+  <g id="deck_equipment" stroke="#16324a" stroke-width="0.1">
+    <rect x="-12" y="-3.6" width="10" height="7.2" fill="#2e668c"/>
+    <rect x="0" y="-3.6" width="10" height="7.2" fill="#2e668c"/>
+    <circle cx="27" cy="0" r="0.4" fill="#e6e6dc"/>
+  </g>
+
+  <g id="superstructure" stroke="#555555" stroke-width="0.1">
+    <rect x="-28" y="-4.2" width="12" height="8.4" fill="#ebebe1"/>
+    <rect x="-25.5" y="-5.2" width="7.5" height="10.4" fill="#c8c8c0"/>
+    <circle cx="-26.8" cy="0" r="1" fill="#d97319" stroke="#141414" stroke-width="0.25"/>
+  </g>
+
+  <!-- Drawn last so it shows on top of the hull. Pivot = rudder stock, x = l_x of the rudder. -->
+  <g id="rudder" data-pivot="-33,0">
+    <polygon points="-33,0 -33.4,-0.45 -34.6,-0.45 -37.5,-0.05 -37.5,0.05 -34.6,0.45 -33.4,0.45"
+             fill="#e64d38" stroke="#5a1a12" stroke-width="0.1"/>
+  </g>
+</svg>

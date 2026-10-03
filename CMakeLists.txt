@@ -23,13 +23,17 @@ add_library(gncv-sim-core
 target_include_directories(gncv-sim-core PUBLIC src ${ARMADILLO_INCLUDE_DIRS})
 target_link_libraries(gncv-sim-core PUBLIC ${ARMADILLO_LIBRARIES})
 
+# Libraries shared by the apps (simdata, vessel_model, playback), see lib/
+add_subdirectory(lib)
+
 add_executable(simulator_v1
     apps/simulator_v1/main.cpp
 )
-target_link_libraries(simulator_v1 PRIVATE gncv-sim-core)
+target_link_libraries(simulator_v1 PRIVATE gncv-sim-core simdata)
 
 # Apps with their own CMakeLists.txt
 add_subdirectory(apps/playback_2d)
+add_subdirectory(apps/playback_3d)
 
 if(BUILD_TESTING)
     add_executable(test_common

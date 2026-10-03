@@ -1,10 +1,10 @@
-#include "playback_clock.hpp"
+#include "playback/playback_clock.hpp"
 
 #include <algorithm>
 #include <iterator>
 #include <cmath>
 
-namespace playback2d {
+namespace playback {
 
 namespace {
 constexpr double kSpeedPresets[] = {0.1, 0.25, 0.5, 1, 2, 4, 8, 16, 32, 64, 100};
@@ -68,4 +68,4 @@ double PlaybackClock::Progress() const {
     return duration > 0.0 ? (time_ - start_) / duration : 0.0;
 }
 
-}  // namespace playback2d
+}  // namespace playback

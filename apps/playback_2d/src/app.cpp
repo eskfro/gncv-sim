@@ -11,8 +11,9 @@
 #include "imgui_impl_sdlrenderer2.h"
 
 #include "app_state.hpp"
-#include "data_files.hpp"
 #include "panels.hpp"
+#include "simdata/paths.hpp"
+#include "simdata/run.hpp"
 
 namespace playback2d {
 
@@ -27,26 +28,30 @@ constexpr Uint32 kMinFrameMs = 8;     // cap at ~120 fps when vsync is unavailab
 
 void SetupState(AppState& state, const Options& options) {
     namespace fs = std::filesystem;
+    playback::Session& session = state.session;
+    const fs::path root = simdata::FindProjectRoot();
+    session.SetProjectRoot(root);
+    session.SetSimdataDir(simdata::SimdataDir(root));
+    session.SetVesselOverride(options.vessel);
+
+    // The input is a run (folder, metadata.json or csv), or a folder of runs
+    fs::path run;
     std::error_code ec;
-    fs::path file;
-    if (!options.input.empty() && fs::is_directory(options.input, ec)) {
-        state.data_dir = options.input;
-    } else if (!options.input.empty()) {
-        file = options.input;
-        state.data_dir = options.input.parent_path().empty() ? fs::path(".") : options.input.parent_path();
+    if (!options.input.empty() && fs::is_directory(options.input, ec) && !simdata::IsRunDir(options.input)) {
+        session.SetSimdataDir(options.input);
     } else {
-        state.data_dir = FindDataDir(ExecutableDir());
+        run = options.input;
     }
 
     state.layers = CreateDefaultLayers();
-    state.clock.SetSpeed(options.speed);
-    state.clock.SetLoop(options.loop);
+    session.clock.SetSpeed(options.speed);
+    session.clock.SetLoop(options.loop);
     state.follow_ship = options.follow;
-    state.RefreshFiles();
+    session.Refresh();
 
-    if (file.empty() && !state.files.empty()) file = state.files.front();  // newest
-    if (!file.empty() && !state.Load(file)) {
-        std::fprintf(stderr, "playback_2d: %s\n", state.load_error.c_str());
+    if (run.empty() && !session.Runs().empty()) run = session.Runs().front().data_file;  // newest
+    if (!run.empty() && !state.Load(run)) {
+        std::fprintf(stderr, "playback_2d: %s\n", session.Error().c_str());
     }
 }
 
@@ -117,8 +122,8 @@ int Run(const Options& options) {
     SetupState(state, options);
     const bool screenshot_mode = !options.screenshot.empty();
     if (screenshot_mode) {
-        state.clock.Pause();
-        state.clock.Seek(options.screenshot_time);
+        state.session.clock.Pause();
+        state.session.clock.Seek(options.screenshot_time);
     }
 
     int exit_code = 0;
@@ -150,10 +155,10 @@ int Run(const Options& options) {
         const Uint64 now = SDL_GetPerformanceCounter();
         const double dt = static_cast<double>(now - last) / static_cast<double>(SDL_GetPerformanceFrequency());
         last = now;
-        state.clock.Update(std::min(dt, kMaxFrameDt));
+        state.session.clock.Update(std::min(dt, kMaxFrameDt));
 
         const std::string wanted_title =
-            state.recording ? "playback_2d - " + state.loaded_file.filename().string() : "playback_2d";
+            state.session.Loaded() ? "playback_2d - " + state.session.GetRun().name : "playback_2d";
         if (wanted_title != title) {
             title = wanted_title;
             SDL_SetWindowTitle(window, title.c_str());

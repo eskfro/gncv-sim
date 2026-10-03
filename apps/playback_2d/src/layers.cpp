@@ -4,6 +4,8 @@
 #include <cmath>
 #include <cstdio>
 
+#include "vessel_model/parts.hpp"
+
 namespace playback2d {
 
 namespace {
@@ -15,12 +17,11 @@ constexpr ImU32 kTrackPast = IM_COL32(90, 190, 255, 230);
 constexpr ImU32 kTrackFuture = IM_COL32(90, 190, 255, 55);
 constexpr ImU32 kTick = IM_COL32(220, 230, 240, 140);
 constexpr ImU32 kReference = IM_COL32(255, 210, 80, 230);
-constexpr ImU32 kHullFill = IM_COL32(235, 235, 225, 255);
 constexpr ImU32 kHullEdge = IM_COL32(30, 30, 30, 255);
-constexpr ImU32 kBridge = IM_COL32(120, 130, 140, 255);
-constexpr ImU32 kRudder = IM_COL32(255, 90, 70, 255);
 constexpr ImU32 kVelocity = IM_COL32(110, 230, 120, 230);
 constexpr ImU32 kForce = IM_COL32(255, 120, 220, 230);
+
+ImU32 ToIm(vessel_model::Color c) { return IM_COL32(c.r, c.g, c.b, c.a); }
 
 ImVec2 ToIm(ScreenPoint p) { return {static_cast<float>(p.x), static_cast<float>(p.y)}; }
 
@@ -188,7 +189,7 @@ public:
 
         // Desired heading psi_d as a dashed line from the ship
         if (f.Has(col::kPsiD)) {
-            const double len_m = std::max(1.5 * ctx.ship.length, 80.0 / ctx.camera.PixelsPerMeter());
+            const double len_m = std::max(1.5 * ctx.ship_length, 80.0 / ctx.camera.PixelsPerMeter());
             const ImVec2 tip = WorldToIm(ctx.camera, BodyToNed(pos, f.Get(col::kPsiD), len_m, 0.0));
             DashedLine(ctx.draw_list, ship, tip, kReference, 1.5f);
             ctx.draw_list->AddText({tip.x + 4.0f, tip.y - 8.0f}, kReference, "psi_d");
@@ -210,6 +211,7 @@ public:
     }
 };
 
+// The vessel's model_2d.svg, with moving parts (rudder) set from the csv
 class ShipLayer : public Layer {
 public:
     ShipLayer() : Layer("Ship", true) {}
@@ -218,33 +220,36 @@ public:
         const Frame& f = ctx.frame;
         const NedPoint pos = Position(f);
         const double psi = f.Get(col::kPsi);
+        const double ppm = ctx.camera.PixelsPerMeter();
 
         // Exaggerate the hull when it would be too small to see
-        const double true_px = ctx.ship.length * ctx.camera.PixelsPerMeter();
+        const double true_px = ctx.ship_length * ppm;
         const double k = std::max(static_cast<double>(scale_), min_length_px_ / true_px);
-        const double l = 0.5 * ctx.ship.length * k;  // half length
-        const double b = 0.5 * ctx.ship.breadth * k;  // half breadth
 
-        auto at = [&](double bx, double by) {
-            return WorldToIm(ctx.camera, BodyToNed(pos, psi, bx, by));
-        };
+        for (const auto& shape : ctx.model.shapes) {
+            const auto* motion = vessel_model::FindPartMotion(shape.part);
+            const double angle = motion != nullptr ? f.Get(motion->column) : 0.0;
+            const vessel_model::Vec2 pivot = ctx.model.Pivot(shape.part);
+            const double c = std::cos(angle);
+            const double s = std::sin(angle);
 
-        // Clockwise on screen: bow, starboard side, stern, port side
-        const ImVec2 hull[] = {at(l, 0.0), at(0.45 * l, b), at(-l, b), at(-l, -b), at(0.45 * l, -b)};
-        ctx.draw_list->AddConvexPolyFilled(hull, 5, kHullFill);
-        ctx.draw_list->AddPolyline(hull, 5, kHullEdge, ImDrawFlags_Closed, 1.5f);
-
-        const ImVec2 bridge[] = {at(-0.35 * l, 0.7 * b), at(-0.65 * l, 0.7 * b), at(-0.65 * l, -0.7 * b),
-                                 at(-0.35 * l, -0.7 * b)};
-        ctx.draw_list->AddConvexPolyFilled(bridge, 4, kBridge);
-
-        // Rudder: positive delta_r gives a starboard force at the stern
-        // (F = k_r * delta_r * u^2), so the trailing edge points to port
-        if (f.Has(col::kDeltaR)) {
-            const double dr = f.Get(col::kDeltaR);
-            const double len = 0.18 * l;
-            ctx.draw_list->AddLine(at(-l, 0.0), at(-l - len * std::cos(dr), -len * std::sin(dr)), kRudder,
-                                   3.0f);
+            points_.clear();
+            for (const auto& p : shape.points) {
+                // Rotate about the pivot (clockwise from above for angle > 0),
+                // then scale about the origin and place in the world
+                const double dx = p.x - pivot.x;
+                const double dy = p.y - pivot.y;
+                const double bx = pivot.x + c * dx - s * dy;
+                const double by = pivot.y + s * dx + c * dy;
+                points_.push_back(WorldToIm(ctx.camera, BodyToNed(pos, psi, k * bx, k * by)));
+            }
+            const int n = static_cast<int>(points_.size());
+            if (shape.fill && n >= 3) ctx.draw_list->AddConcavePolyFilled(points_.data(), n, ToIm(*shape.fill));
+            if (shape.stroke) {
+                const float width = std::clamp(static_cast<float>(shape.stroke_width * ppm * k), 1.0f, 8.0f);
+                ctx.draw_list->AddPolyline(points_.data(), n, ToIm(*shape.stroke),
+                                           shape.closed ? ImDrawFlags_Closed : ImDrawFlags_None, width);
+            }
         }
         ctx.draw_list->AddCircleFilled(WorldToIm(ctx.camera, pos), 2.5f, kHullEdge);
     }
@@ -257,6 +262,7 @@ public:
 private:
     float scale_{1.0f};
     float min_length_px_{48.0f};
+    std::vector<ImVec2> points_;
 };
 
 class VelocityLayer : public Layer {

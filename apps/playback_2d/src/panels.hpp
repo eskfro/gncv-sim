@@ -5,15 +5,13 @@
 #include "imgui.h"
 
 #include "app_state.hpp"
+#include "playback/widgets.hpp"
 
 namespace playback2d {
 
-struct Rect {
-    ImVec2 pos;
-    ImVec2 size;
-};
+using playback::Rect;
 
-// Files, telemetry, layers and key help
+// Runs, run info, telemetry, layers and key help
 void DrawSidePanel(AppState& state, const Rect& rect);
 // Play/pause, speed and timeline
 void DrawPlaybackBar(AppState& state, const Rect& rect);

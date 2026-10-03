@@ -1,6 +1,6 @@
-// playback_2d: replays simulator_v1 csv files as a top-down 2D animation.
+// playback_2d: replays simulation runs as a top-down 2D animation.
 //
-// Usage: playback_2d [FILE.csv | DIR] [options]   (see --help)
+// Usage: playback_2d [RUN | DIR] [options]   (see --help)
 
 #include <cstdio>
 #include <cstdlib>
@@ -12,12 +12,15 @@ namespace {
 
 void PrintUsage() {
     std::printf(
-        "Usage: playback_2d [FILE.csv | DIR] [options]\n"
+        "Usage: playback_2d [RUN | DIR] [options]\n"
         "\n"
-        "Plays back a simulator_v1 recording. With no argument the newest csv in\n"
-        "simdata/simulator_v1 is opened.\n"
+        "Plays back a simulation run. RUN is a run folder (simdata/<run>/), its\n"
+        "metadata.json or a csv file. DIR is a folder of runs. With no argument\n"
+        "the newest run in simdata/ is opened. The vessel is drawn from\n"
+        "vessels/<vessel>/model_2d.svg, with the vessel named in metadata.json.\n"
         "\n"
         "Options:\n"
+        "  --vessel NAME      draw this vessel (folder in vessels/) for every run\n"
         "  --speed X          playback speed, default 1 (real time)\n"
         "  --follow           keep the camera centred on the ship\n"
         "  --loop             restart at the end\n"
@@ -54,6 +57,8 @@ int main(int argc, char** argv) {
             options.speed = value;
         } else if (arg == "--ui-scale" && has_value && ParseDouble(argv[++i], value) && value > 0.0) {
             options.ui_scale = static_cast<float>(value);
+        } else if (arg == "--vessel" && has_value) {
+            options.vessel = argv[++i];
         } else if (arg == "--screenshot" && has_value) {
             options.screenshot = argv[++i];
         } else if (arg == "--time" && has_value && ParseDouble(argv[++i], value)) {

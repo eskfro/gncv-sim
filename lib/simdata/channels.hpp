@@ -1,16 +1,17 @@
 #pragma once
 // ============================================================================
-// Knowledge about the simulator_v1 csv format, kept in one place.
+// Knowledge about the simulation csv columns, kept in one place.
 //
-// Everything else in playback_2d looks columns up by name, so supporting a new
-// column (or a new simulator) means editing this file and adding a layer or
-// panel that uses it.
+// Readers look columns up by name, so supporting a new column means adding
+// its name here (plus its interpolation rule if it is an angle or a discrete
+// value) and using it where needed. Check Has() first, so older files still
+// work. Units and descriptions are in the run's metadata.json.
 // ============================================================================
 #include <array>
 #include <string_view>
 #include <vector>
 
-namespace playback2d {
+namespace simdata {
 
 // How a column is interpolated between two rows
 enum class Interp {
@@ -24,11 +25,15 @@ namespace col {
 inline constexpr std::string_view kT = "t";
 inline constexpr std::string_view kX = "x";
 inline constexpr std::string_view kY = "y";
+inline constexpr std::string_view kZ = "z";
 inline constexpr std::string_view kPhi = "phi";
 inline constexpr std::string_view kTheta = "theta";
 inline constexpr std::string_view kPsi = "psi";
 inline constexpr std::string_view kU = "u";
 inline constexpr std::string_view kV = "v";
+inline constexpr std::string_view kW = "w";
+inline constexpr std::string_view kP = "p";
+inline constexpr std::string_view kQ = "q";
 inline constexpr std::string_view kR = "r";
 
 // Generalized forces in body frame
@@ -53,7 +58,8 @@ inline constexpr std::string_view kNtt = "n_tt";
 inline const std::vector<std::string_view> kRequiredColumns = {col::kT, col::kX, col::kY,
                                                                col::kPsi};
 
-// Same order as common::GuidanceMode in src/common.hpp
+// Same order as common::GuidanceMode in src/common.hpp. Runs with metadata
+// also list them in parameters.guidance_modes.
 inline constexpr std::array<const char*, 3> kGuidanceModes = {"HeadingHold", "PositionHold",
                                                               "WaypointTracking"};
 
@@ -66,11 +72,4 @@ inline Interp DefaultInterp(std::string_view column) {
     return Interp::Linear;
 }
 
-// Hull size used for drawing. Matches vessel::VesselParams in src/dynamics.hpp,
-// which is not stored in the csv.
-struct ShipGeometry {
-    double length = 70.0;   // [m]
-    double breadth = 10.0;  // [m]
-};
-
-}  // namespace playback2d
+}  // namespace simdata

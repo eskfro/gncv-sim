@@ -1,4 +1,4 @@
-.PHONY: 2d v1 playback clean-v1 test
+.PHONY: 2d v1 playback playback3d clean-v1 test
 
 v1:
 	cmake --build build -j8
@@ -13,8 +13,14 @@ playback:
 	cmake --build build -j8 --target playback_2d
 	./build/playback_2d
 
+playback3d:
+	cmake --build build -j8 --target playback_3d
+	./build/playback_3d
+
+# Removes every simulator_v1 run: run folders and csv files from before them
 clean-v1:
-	rm -f simdata/simulator_v1/*.csv
+	rm -rf simdata/*_simulator_v1 simdata/simulator_v1
 
 test:
-	./build/test_common
+	cmake --build build -j8
+	cd build && ctest --output-on-failure

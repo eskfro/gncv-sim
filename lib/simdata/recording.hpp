@@ -15,9 +15,9 @@
 #include <string_view>
 #include <vector>
 
-#include "channels.hpp"
+#include "simdata/channels.hpp"
 
-namespace playback2d {
+namespace simdata {
 
 class Recording;
 
@@ -80,4 +80,4 @@ private:
 // Smallest signed angle, in (-pi, pi]
 double WrapAngle(double angle);
 
-}  // namespace playback2d
+}  // namespace simdata

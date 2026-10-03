@@ -1,4 +1,4 @@
-#include "recording.hpp"
+#include "simdata/recording.hpp"
 
 #include <algorithm>
 #include <cerrno>
@@ -7,7 +7,7 @@
 #include <fstream>
 #include <stdexcept>
 
-namespace playback2d {
+namespace simdata {
 
 namespace {
 
@@ -175,4 +175,4 @@ Frame Recording::Sample(double t) const {
     return frame;
 }
 
-}  // namespace playback2d
+}  // namespace simdata

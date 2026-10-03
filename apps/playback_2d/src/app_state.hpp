@@ -4,41 +4,37 @@
 // ============================================================================
 #include <filesystem>
 #include <memory>
-#include <optional>
-#include <string>
 #include <vector>
 
 #include "camera.hpp"
-#include "channels.hpp"
 #include "layers.hpp"
-#include "playback_clock.hpp"
-#include "recording.hpp"
+#include "playback/session.hpp"
+#include "vessel_model/model_2d.hpp"
 
 namespace playback2d {
 
 struct AppState {
-    // Files
-    std::filesystem::path data_dir;
-    std::vector<std::filesystem::path> files;
-    std::filesystem::path loaded_file;
-    std::optional<Recording> recording;
-    std::string load_error;
+    // Runs, the loaded recording, its vessel and the playback clock
+    playback::Session session;
 
-    // Playback and view
-    PlaybackClock clock;
+    // View
     Camera camera;
     bool follow_ship{false};
     bool was_following{false};  // to zoom in when follow is switched on
     bool fit_requested{false};  // fit the whole track on the next frame
-    ShipGeometry ship;
+    vessel_model::Model2D model;  // top view of the loaded run's vessel
     std::vector<std::unique_ptr<Layer>> layers;
 
-    // Loads a csv and rewinds playback. On failure keeps the current
-    // recording and sets load_error.
+    // Opens a run (folder, metadata.json or csv), loads its vessel's
+    // model_2d.svg and fits the view. On failure keeps the current run and
+    // session.Error() says why.
     bool Load(const std::filesystem::path& path);
-    void RefreshFiles();
-    // Fit the camera to the whole track of the loaded recording
+    // Fit the camera to the whole track of the loaded run
     void FitTrack();
+    double ShipLength() const;
+
+private:
+    void LoadModel();
 };
 
 }  // namespace playback2d
