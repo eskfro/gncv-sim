@@ -12,17 +12,23 @@
 #include "imgui.h"
 
 #include "camera.hpp"
-#include "channels.hpp"
-#include "recording.hpp"
+#include "simdata/channels.hpp"
+#include "simdata/recording.hpp"
+#include "vessel_model/model_2d.hpp"
 
 namespace playback2d {
+
+using simdata::Frame;
+using simdata::Recording;
+namespace col = simdata::col;
 
 struct DrawContext {
     ImDrawList* draw_list;
     const Camera& camera;
     const Recording& recording;
     const Frame& frame;  // the recording sampled at the current playback time
-    const ShipGeometry& ship;
+    const vessel_model::Model2D& model;  // top view of the vessel, body frame
+    double ship_length;  // [m]
 };
 
 class Layer {

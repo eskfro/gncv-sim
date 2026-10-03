@@ -3,11 +3,13 @@
 // Window, event loop and layout (SDL2 + Dear ImGui)
 // ============================================================================
 #include <filesystem>
+#include <string>
 
 namespace playback2d {
 
 struct Options {
-    std::filesystem::path input;  // csv file or data directory, empty = auto
+    std::filesystem::path input;  // run folder, csv or simdata directory, empty = auto
+    std::string vessel;           // draw this vessel for every run, empty = from metadata
     double speed{1.0};
     bool follow{false};
     bool loop{false};

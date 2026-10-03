@@ -3,7 +3,7 @@
 // Playback time: maps wall clock time to simulation time at a chosen speed.
 // ============================================================================
 
-namespace playback2d {
+namespace playback {
 
 class PlaybackClock {
 public:
@@ -46,4 +46,4 @@ private:
     bool loop_{false};
 };
 
-}  // namespace playback2d
+}  // namespace playback

@@ -9,6 +9,8 @@ simdata/*
 *.lo
 *.o
 *.obj
+# ... but Wavefront OBJ vessel models are source files
+!vessels/**/*.obj
 
 # Precompiled Headers
 *.gch

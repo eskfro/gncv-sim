@@ -1,11 +1,23 @@
+"""Plots simulation runs from simdata/.
+
+Usage: python3 main.py [RUN]
+
+RUN is a run folder (simdata/<run>/), its metadata.json or a csv file.
+Without it the newest run is selected.
+"""
+import json
+import sys
+from dataclasses import dataclass
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.widgets import RadioButtons
 
-DATA_DIR = Path(__file__).resolve().parents[2] / "simdata" / "simulator_v1"
-MAX_FILES = 15  # only the newest files are listed
+SIMDATA_DIR = Path(__file__).resolve().parents[2] / "simdata"
+METADATA_FILE = "metadata.json"
+DATA_FILE = "simulation.csv"
+MAX_RUNS = 15  # only the newest runs are listed
 
 RAD2DEG = 180.0 / np.pi
 
@@ -18,18 +30,84 @@ ACT_COLS = ["delta_r_ref", "delta_r_cmd", "delta_r",
             "n_mp_ref", "n_mp_cmd", "n_mp", "n_tt_ref", "n_tt_cmd", "n_tt"]
 
 
-def list_files():
+# ---------------------------------------------------------------------------
+# Runs on disk. Each simulation has its own folder:
+#   simdata/YYYYMMDD_HHMMSS_simulator_v1/metadata.json + simulation.csv
+# Loose csv files from before (simdata/simulator_v1/*.csv) are listed too.
+# Same rules as lib/simdata/run.hpp.
+# ---------------------------------------------------------------------------
+
+@dataclass
+class Run:
+    name: str
+    csv: Path
+    metadata: dict  # empty when the run has no metadata.json
+
+    @property
+    def sort_key(self):
+        # Legacy names have HH:MM:SS, new ones HHMMSS
+        return self.name.replace(":", "")
+
+
+def read_metadata(run_dir):
+    try:
+        with open(run_dir / METADATA_FILE) as f:
+            return json.load(f)
+    except (OSError, ValueError) as e:
+        print(f"Ignoring {run_dir / METADATA_FILE}: {e}")
+        return {}
+
+
+def resolve_run(path):
+    """The run a path refers to: a run folder, its metadata.json or a csv file. None otherwise."""
+    path = Path(path)
+    if path.is_dir():
+        if not ((path / METADATA_FILE).is_file() or (path / DATA_FILE).is_file()):
+            return None
+        metadata = read_metadata(path) if (path / METADATA_FILE).is_file() else {}
+        csv = path / Path(metadata.get("data_file") or DATA_FILE).name
+        return Run(path.name, csv, metadata)
+    if path.name == METADATA_FILE:
+        return resolve_run(path.parent)
+    if path.suffix == ".csv" and path.is_file():
+        if (path.parent / METADATA_FILE).is_file():
+            return Run(path.parent.name, path, read_metadata(path.parent))
+        return Run(path.stem, path, {})
+    return None
+
+
+def list_runs():
     """Newest first, so the latest simulation is selected by default."""
-    files = sorted(DATA_DIR.glob("*_simulator_v1.csv"), reverse=True)
-    return files[:MAX_FILES]
+    runs = []
+    if SIMDATA_DIR.is_dir():
+        for entry in SIMDATA_DIR.iterdir():
+            if entry.suffix == ".csv" and entry.is_file():
+                runs.append(Run(entry.stem, entry, {}))
+            elif entry.is_dir():
+                run = resolve_run(entry)
+                if run:
+                    runs.append(run)
+                else:  # a folder of legacy csv files
+                    runs += [Run(f.stem, f, {}) for f in entry.glob("*.csv")]
+    runs.sort(key=lambda r: r.sort_key, reverse=True)
+    return runs[:MAX_RUNS]
 
 
-def load(path):
-    return np.genfromtxt(path, delimiter=",", names=True)
+def load(run):
+    return np.genfromtxt(run.csv, delimiter=",", names=True)
 
 
-def file_label(path):
-    return path.name.removesuffix("_simulator_v1.csv")
+def run_label(run):
+    return run.name.removesuffix("_simulator_v1")
+
+
+def run_title(run):
+    """Run name plus what metadata.json says about it."""
+    m = run.metadata
+    details = [m[k] for k in ("simulator", "vessel") if m.get(k)]
+    if m.get("dt"):
+        details.append(f"dt = {m['dt']:g} s")
+    return f"{run.name}" + (f"  [{', '.join(details)}]" if details else "  [no metadata]")
 
 
 # ---------------------------------------------------------------------------
@@ -275,38 +353,38 @@ REQUIRES = {
 
 
 class Plotter:
-    def __init__(self, files):
-        self.files = files
+    def __init__(self, runs, selected=0):
+        self.runs = runs
         self.cache = {}
-        self.file = files[0]
+        self.run = runs[selected]
         self.view = "Overview"
         self.plot_axes = []
 
         self.fig = plt.figure(figsize=(14, 8))
 
-        ax_files = self.fig.add_axes([0.01, 0.45, 0.17, 0.50])
-        ax_files.set_title("File", fontsize=10)
-        self.radio_files = RadioButtons(ax_files, [file_label(f) for f in files])
-        self.radio_files.on_clicked(self.select_file)
+        ax_runs = self.fig.add_axes([0.01, 0.45, 0.17, 0.50])
+        ax_runs.set_title("Run", fontsize=10)
+        self.radio_runs = RadioButtons(ax_runs, [run_label(r) for r in runs], active=selected)
+        self.radio_runs.on_clicked(self.select_run)
 
         ax_views = self.fig.add_axes([0.01, 0.10, 0.17, 0.30])
         ax_views.set_title("View", fontsize=10)
         self.radio_views = RadioButtons(ax_views, list(VIEWS))
         self.radio_views.on_clicked(self.select_view)
 
-        for radio in (self.radio_files, self.radio_views):
+        for radio in (self.radio_runs, self.radio_views):
             for label in radio.labels:
                 label.set_fontsize(8)
 
         self.draw()
 
     def data(self):
-        if self.file not in self.cache:
-            self.cache[self.file] = load(self.file)
-        return self.cache[self.file]
+        if self.run.csv not in self.cache:
+            self.cache[self.run.csv] = load(self.run)
+        return self.cache[self.run.csv]
 
-    def select_file(self, label):
-        self.file = next(f for f in self.files if file_label(f) == label)
+    def select_run(self, label):
+        self.run = next(r for r in self.runs if run_label(r) == label)
         self.draw()
 
     def select_view(self, label):
@@ -325,7 +403,7 @@ class Plotter:
             # Old csv without the new columns: say so instead of raising KeyError
             ax = self.fig.add_axes([0.26, 0.08, 0.71, 0.82])
             ax.axis("off")
-            ax.text(0.5, 0.5, f"{self.file.name}\nhas no data for this view\n"
+            ax.text(0.5, 0.5, f"{self.run.name}\nhas no data for this view\n"
                               f"(missing: {', '.join(missing[:3])}, ...)",
                     ha="center", va="center")
             self.plot_axes = [ax]
@@ -335,19 +413,30 @@ class Plotter:
                                        width_ratios=width_ratios,
                                        height_ratios=height_ratios)
             self.plot_axes = view(self.fig, gs, d)
-        self.fig.suptitle(f"{self.view} - {self.file.name}  ({d['t'][-1]:.1f} s)")
+        self.fig.suptitle(f"{self.view} - {run_title(self.run)}  ({d['t'][-1]:.1f} s)")
         self.fig.canvas.draw_idle()
 
 
 def main():
     print("=== simulator_v1_plotter ===")
 
-    files = list_files()
-    if not files:
-        print(f"No simulations found in {DATA_DIR}")
+    runs = list_runs()
+    selected = 0
+    if len(sys.argv) > 1:
+        run = resolve_run(sys.argv[1])
+        if run is None:
+            print(f"{sys.argv[1]} is not a simulation run (a run folder, metadata.json or csv file)")
+            return
+        same = [i for i, r in enumerate(runs) if r.csv.resolve() == run.csv.resolve()]
+        if same:
+            selected = same[0]
+        else:
+            runs.insert(0, run)
+    if not runs:
+        print(f"No simulations found in {SIMDATA_DIR}")
         return
 
-    plotter = Plotter(files)  # keep a reference so the widgets stay alive
+    plotter = Plotter(runs, selected)  # keep a reference so the widgets stay alive
     plt.show()
 
 
