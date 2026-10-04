@@ -207,6 +207,7 @@ void Eskf15::CorrectStateFromGnss(double dt, const arma::vec3& pos_meas, const a
 }
 
 void Eskf15::InjectErrorState() {
+    // Inject the error state into the nominal state
     const arma::vec4 q_err = common::quat_exp(delta_x_.subvec(6, 8));
 
     p_ += delta_x_.subvec(0, 2);
@@ -219,11 +220,12 @@ void Eskf15::InjectErrorState() {
 
 void Eskf15::CovarianceReset() {
     const arma::mat33 I3 = arma::eye(3, 3);
+    const arma::vec3 delta_theta = delta_x_.subvec(6, 8);
 
     // ESKF covariance reset (theorem 6.5.1)
     common::mat1515 G{};
     G.submat(0, 0, 5, 5) = arma::eye(6, 6);
-    G.submat(6, 6, 8, 8) = I3 - common::S(0.5 * delta_x_.subvec(6, 8));
+    G.submat(6, 6, 8, 8) = I3 - common::S(0.5 * delta_theta);
     G.submat(9, 9, 14, 14) = arma::eye(6, 6);
 
     P_ = G * P_ * G.t();
