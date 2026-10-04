@@ -20,9 +20,11 @@ Simple vessel simulator. Each run is saved as a run folder in `simdata/`. Run it
 
 ### Playback 2D
 Replays a run as a top-down animation, with the vessel drawn from its `model_2d.svg`. Run it with `make playback`.
+<img width="1387" height="895" alt="image" src="https://github.com/user-attachments/assets/314469dc-9ef4-464b-bf20-2c3c584b41ae" />
 
 ### Playback 3D
 Replays a run in 3D, with the vessel drawn from its `model_3d.obj` in its full pose (position, heave, roll, pitch, yaw). Run it with `make playback3d`.
+<img width="1399" height="888" alt="image" src="https://github.com/user-attachments/assets/cc9ddda0-7221-4e7b-b39e-fe860709e9e7" />
 
 ### Tests
 `make test` builds everything and runs all unit tests with CTest.
