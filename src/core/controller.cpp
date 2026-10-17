@@ -6,8 +6,8 @@ Input:
 Output: 
     Actuator commands
 */
-#include "controller.hpp"
-#include "common.hpp"
+#include "core/controller.hpp"
+#include "core/common.hpp"
 
 namespace controller {
 

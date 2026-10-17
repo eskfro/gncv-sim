@@ -2,7 +2,7 @@
 
 #include <armadillo>
 
-#include "common.hpp"
+#include "core/common.hpp"
 
 namespace estimation {
 

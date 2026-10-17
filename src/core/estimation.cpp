@@ -1,7 +1,8 @@
-#include "estimation.hpp"
-#include "common.hpp"
 #include <armadillo>
 #include <cmath>
+
+#include "core/estimation.hpp"
+#include "core/common.hpp"
 
 namespace estimation {
 

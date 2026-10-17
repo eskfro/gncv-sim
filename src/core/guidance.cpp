@@ -1,6 +1,7 @@
-#include "guidance.hpp"
-#include "common.hpp"
 #include <cmath>
+
+#include "core/guidance.hpp"
+#include "core/common.hpp"
 
 namespace guidance {
 

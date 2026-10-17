@@ -3,7 +3,7 @@
 #include <armadillo>
 #include <filesystem>
 
-#include "common.hpp"
+#include "core/common.hpp"
 
 namespace vessel {
 

@@ -1,10 +1,10 @@
-#include "common.hpp"
-
 #include <algorithm>
 #include <armadillo>
 #include <cmath>
 #include <math.h>
 #include <system_error>
+
+#include "core/common.hpp"
 
 namespace common {
 

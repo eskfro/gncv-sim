@@ -9,8 +9,8 @@
 #include <thread>
 #include <vector>
 
-#include "common.hpp"
-#include "vessel.hpp"
+#include "core/common.hpp"
+#include "core/vessel.hpp"
 #include "simdata/paths.hpp"
 #include "simdata/run.hpp"
 

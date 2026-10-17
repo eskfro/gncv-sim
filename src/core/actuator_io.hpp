@@ -20,12 +20,13 @@
 //   tau     : generalized force/moment from an actuator, mapped to
 //             vessel reference point via lever arm (moment = r x F)
 // ============================================================================
-#include "actuator.hpp"
-#include "common.hpp"
 #include <armadillo>
 #include <stdlib.h>
 #include <cstdint>
 #include <string_view>
+
+#include "core/actuator.hpp"
+#include "core/common.hpp"
 
 /*
 IO wrapper for the actuators

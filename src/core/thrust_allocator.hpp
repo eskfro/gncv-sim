@@ -1,7 +1,7 @@
 #pragma once
 
-#include "common.hpp"
-#include "actuator_io.hpp"
+#include "core/common.hpp"
+#include "core/actuator_io.hpp"
 
 namespace allocator {
 

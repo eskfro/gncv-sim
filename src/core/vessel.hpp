@@ -36,13 +36,13 @@
 #include <armadillo>
 #include <vector>
 
-#include "actuator_io.hpp"
-#include "common.hpp"
-#include "guidance.hpp"
-#include "dynamics.hpp"
-#include "controller.hpp"
-#include "sensor_io.hpp"
-#include "thrust_allocator.hpp"
+#include "core/actuator_io.hpp"
+#include "core/common.hpp"
+#include "core/guidance.hpp"
+#include "core/dynamics.hpp"
+#include "core/controller.hpp"
+#include "core/sensor_io.hpp"
+#include "core/thrust_allocator.hpp"
 
 namespace vessel {
 

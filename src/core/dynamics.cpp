@@ -1,8 +1,9 @@
-#include "dynamics.hpp"
-#include "common.hpp"
 #include <armadillo>
 #include <cmath>
 #include <filesystem>
+
+#include "core/dynamics.hpp"
+#include "core/common.hpp"
 
 /*
 Dynamics (Fossen)

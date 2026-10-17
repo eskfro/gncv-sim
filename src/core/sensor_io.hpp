@@ -1,8 +1,9 @@
 #pragma once
 
-#include "common.hpp"
-#include "sensor.hpp"
 #include <armadillo>
+
+#include "core/common.hpp"
+#include "core/sensor.hpp"
 
 namespace sensor_io {
 

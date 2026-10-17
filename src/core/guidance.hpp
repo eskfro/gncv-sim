@@ -1,7 +1,7 @@
 // #pragma twice
 #pragma once
 
-#include "common.hpp"
+#include "core/common.hpp"
 
 namespace guidance {
 

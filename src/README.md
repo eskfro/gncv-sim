@@ -1,2 +1,6 @@
 # src
-This is the core source files for the vessel simulator. This includes the dynamics, models, sensors and estimation package.
+Directory for the source code.
+
+### core
+The simulation core. Dynamics and vessel models are here. This is where I work.
+

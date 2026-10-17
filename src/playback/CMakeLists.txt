@@ -1,14 +1,8 @@
-# playback: shared by the playback apps.
-#
-#   playback     PlaybackClock and Session (runs, loaded recording, vessel).
-#                No GUI dependencies, always built and tested.
-#   playback_ui  ImGui widgets (run list, telemetry, playback bar). Only
-#                built when SDL2 is installed.
 add_library(playback
     playback_clock.cpp
     session.cpp
 )
-target_include_directories(playback PUBLIC ${PROJECT_SOURCE_DIR}/lib)
+target_include_directories(playback PUBLIC ${PROJECT_SOURCE_DIR}/src)
 target_link_libraries(playback PUBLIC simdata vessel_model)
 
 if(BUILD_TESTING)

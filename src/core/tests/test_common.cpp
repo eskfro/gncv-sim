@@ -1,7 +1,7 @@
-#include "common.hpp"
-
 #include <armadillo>
 #include <cmath>
+
+#include "core/common.hpp"
 
 namespace {
 

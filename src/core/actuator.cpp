@@ -1,8 +1,9 @@
-#include "actuator.hpp"
-#include "common.hpp"
 #include <algorithm>
 #include <armadillo>
 #include <cmath>
+
+#include "core/actuator.hpp"
+#include "core/common.hpp"
 
 namespace actuators {
 

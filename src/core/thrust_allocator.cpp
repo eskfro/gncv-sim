@@ -1,9 +1,10 @@
-#include "thrust_allocator.hpp"
-#include "actuator_io.hpp"
-#include "common.hpp"
 #include <any>
 #include <armadillo>
 #include <cstddef>
+
+#include "core/thrust_allocator.hpp"
+#include "core/actuator_io.hpp"
+#include "core/common.hpp"
 
 namespace allocator {
 

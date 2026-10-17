@@ -1,5 +1,5 @@
-#include "sensor.hpp"
-#include "common.hpp"
+#include "core/sensor.hpp"
+#include "core/common.hpp"
 
 namespace sensor {
 
