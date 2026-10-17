@@ -7,6 +7,20 @@
 
 namespace vessel {
 
+/*
+Notes about 6-dof vessel models
+
+- The M matrix can be reduced down to 12 parameters if the vessel is symmetric (port / starboard symmetric) (xz)
+- Other symmetries will remove more parameters but are rarely used
+
+Submarine models
+- Longitudinal (1, 3, 5) (u_r, w_r, q and theta) 
+- Lateral (2, 4, 6) (v_r, p, r, phi, psi)
+- We can make a subsystem for longityudinal and lateral equations.
+- Then we get M_{long} and M_{lat}
+
+*/
+
 struct VesselParams {
     // Physical stuff
     double length = 70;

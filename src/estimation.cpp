@@ -192,13 +192,16 @@ void Eskf15::CorrectStateFromGnss(double dt, const arma::vec3& pos_meas, const a
     const arma::mat33 S = H * P_ * H.t() + R_meas;
 
     // Kalman gain
-    arma::mat K(15, 3, arma::fill::zeros);
-    K = P_ * H.t() * S.i();
+    arma::mat W(15, 3, arma::fill::zeros);
+    W = P_ * H.t() * S.i();
+
+    // Innovation
+    const arma::vec3 z_hat = p_ + R_q * lever_arm_;
+    const arma::vec3 y = pos_meas - z_hat;
 
     // Update states
-    const arma::vec3 y = pos_meas - (p_ + R_q * lever_arm_);
-    delta_x_ = K * y;
-    P_ = (I - K*H) * P_ * (I - K*H).t() + K * R_meas * K.t();
+    delta_x_ = W * y;
+    P_ = (I - W*H) * P_ * (I - W*H).t() + W * R_meas * W.t();
 
     InjectErrorState();
     CovarianceReset();

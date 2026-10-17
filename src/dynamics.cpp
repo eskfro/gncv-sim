@@ -22,7 +22,7 @@ M nu' + C(nu)nu + D(nu)nu + g(eta) + g0 = tau + tau_wind + tau_wave
 namespace vessel {
 
 common::vec12 Dynamics::StateDot(const common::vec12& x, double t) const {
-    const bool underwater = false;
+    const bool underwater = false; // help im under the water
     const VesselParams p = vessel_params_;
     const arma::vec6 eta = x.subvec(0, 5);
     const arma::vec6 nu  = x.subvec(6, 11);

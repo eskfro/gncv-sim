@@ -195,6 +195,7 @@ arma::mat66 M_a(double m, double i_x, double i_y, double i_z) {
 // Corelois rigid body
 arma::mat66 C_rb(double m, const arma::mat33& I0, const arma::vec3& r_cg, const arma::vec6& nu) {
     const arma::vec3 nu2 = nu.subvec(3, 5);
+    
     const arma::mat33 C11 = m * S(nu2);
     const arma::mat33 C12 = -m * S(nu2) * S(r_cg);
     const arma::mat33 C21 = m * S(r_cg) * S(nu2);
