@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <armadillo>
 #include <cmath>
+#include <cstdlib>
 
 #include "core/actuator.hpp"
 #include "core/common.hpp"
@@ -32,19 +33,21 @@ double SimulatedMainPropulsion::ForceToCommand(double f) const {
 
 // === RUDDER ===
 
-void SimulatedRudder::Step(double dt) {
+void SimulatedRudder::Step(double dt, double u_r) {
+    // Dynamics
     delta_r_ += common::first_order_lowpass(dt, time_constant_, delta_c_, delta_r_);
-}
 
-void SimulatedRudder::UpdateTau(double u) {
-    const double F = k_r_ * delta_r_ * u * u;
-    tau_(1) = F;                
-    tau_(5) = F * l_x_;   
-}
+    const double u2s = u_r * std::abs(u_r);
+    const double delta2 = std::pow(delta_r_, 2);
+    const double delta = delta_r_;
 
-// Simple model for the rudder force
-const arma::vec6& SimulatedRudder::Tau() const {
-    return tau_;
+    // Force vector
+    const double f_x =  -k_drag_ * u2s * delta2;
+    const double f_y =   k_lift_ * u2s * delta;
+    const double f_z =   0;
+
+    f_vec_ = {f_x, f_y, f_z};
+
 }
 
 void SimulatedRudder::SetAngleCommand(double delta_c) {
@@ -55,33 +58,37 @@ double SimulatedRudder::ForceToCommand(double f, double u) const {
     // Invert F = k_r * delta * u^2  ->  delta = f / (k_r * u^2)
     constexpr double u_min = 0.1;           // divide by zero guard
     const double u_eff = std::max(std::abs(u), u_min);
-    double delta = f / (k_r_ * u_eff * u_eff);
+
+    double delta = f / (k_lift_ * u_eff * u_eff);
 
     return std::clamp(delta, -delta_max_, delta_max_);
 }
 
 // === TUNNEL THRUSTER ===
 
-void SimulatedTunnelThruster::Step(double dt) {
+void SimulatedTunnelThruster::Step(double dt, double u_r) {
+    const double u = std::abs(u_r);
+    const double n_prev = n_;
     // Tunnel thruster dynamics
     n_ += common::first_order_lowpass(dt, time_constant_, n_c_, n_);
+    n_rate_ = (n_ - n_prev) / dt;
 
-    // Update tau
-    const double T = k_tt_ * n_ * std::abs(n_);
-    tau_(1) = T;
-    tau_(5) = T * l_x_;
-}
-
-const arma::vec6& SimulatedTunnelThruster::Tau() const {
-    return tau_;
+    // Update force vector
+    const double decay = std::exp(-u*k_ur_);
+    const double force =  decay * k_tt_ * n_ * std::abs(n_);
+    f_vec_ = force * f_dir_;
 }
 
 void SimulatedTunnelThruster::SetRpmCommand(double n_c) {
     n_c_ = std::clamp(n_c, n_min_, n_max_);
 }
 
-double SimulatedTunnelThruster::ForceToCommand(double f) const {
-    return std::copysign(std::sqrt(std::abs(f) / k_tt_), f);
+double SimulatedTunnelThruster::ForceToCommand(double f, double u_r) const {
+    const double u = std::abs(u_r);
+    const double sign = common::sign(f);
+    const double decay = std::exp(-u*k_ur_);
+
+    return sign * std::sqrt(std::abs(f) / (k_tt_ * decay)); 
 }
 
 } // namespace actuators

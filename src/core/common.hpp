@@ -9,6 +9,14 @@
 
 #include <armadillo>
 #include <functional>
+#include <string_view>
+
+namespace ansi {
+    inline constexpr std::string_view green = "\033[32m";
+    inline constexpr std::string_view yellow = "\033[33m";
+    inline constexpr std::string_view red = "\033[31m";
+    inline constexpr std::string_view reset = "\033[0m";
+} // namespace ansi
 
 namespace common {
 
@@ -30,6 +38,7 @@ using mat1515 = arma::Mat<double>::fixed<15, 15>;
 using mat1512 = arma::Mat<double>::fixed<15, 12>;
 
 enum class GuidanceMode : uint8_t {HeadingHold, PositionHold, WaypointTracking};
+enum class ThrustMode : uint8_t {Transit, DP};
 
 struct Reference {
     GuidanceMode guidance_mode{};
@@ -95,6 +104,10 @@ arma::mat33 quat_to_rotmat(const quat& q);
 quat quat_from_euler(const arma::vec3& a);
 arma::vec3 quat_to_euler(const quat& q);
 
+// Program helper
+void PrintError(const std::string_view& e);
+void Panic(const std::string_view& s);
+
 // Utilities
 double deg2rad(double deg);
 bool inrange(double value, double range_min, double range_max);
@@ -104,6 +117,7 @@ arma::mat66 join33blocks(arma::mat33 A, arma::mat33 B, arma::mat33 C, arma::mat3
 arma::mat44 join22blocks(arma::mat33 A, arma::mat33 B, arma::mat33 C, arma::mat33 D);
 double U(const arma::vec6& nu);
 double heaviside(double t, double t_step, double value);
+double sign(double x);
 
 // Numerical solvers
 vec12 solver_12d_rk4(std::function<vec12(vec12, double)> f, vec12 x, double t, double dt);

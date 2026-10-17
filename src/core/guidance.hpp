@@ -13,6 +13,7 @@ public:
     void Step(double dt);
 
     const common::Reference& Reference() const { return reference_; }
+    const common::GuidanceMode& GuidanceMode() const { return guidance_mode_; }
 
 private:
     double time_{};

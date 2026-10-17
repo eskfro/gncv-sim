@@ -1,6 +1,7 @@
 #include <any>
 #include <armadillo>
 #include <cstddef>
+#include <cstdlib>
 
 #include "core/thrust_allocator.hpp"
 #include "core/actuator_io.hpp"
@@ -31,6 +32,18 @@ void ThrustAllocator::Init() {
     }
     for (const auto tt : tunnel_thrusters_) {
         T_alpha_.col(col++) = tt.ThrustConfig();
+    }
+}
+
+void ThrustAllocator::UpdateThrustMatrix(const common::GuidanceMode& guidance_mode) {
+    if (thrust_mode_ == common::ThrustMode::Transit) {
+        int col = 0;
+        T_alpha_ = arma::mat(3, )
+
+    } else if (thrust_mode_ == common::ThrustMode::DP) {
+
+    } else {
+        common::Panic("Could not update thrust matrix");
     }
 }
 

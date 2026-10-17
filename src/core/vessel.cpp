@@ -32,6 +32,7 @@ void Vessel::Step(double dt) {
     controller_.UpdateThrustReference(dt, reference_, dynamics_.Eta(), dynamics_.Nu());
 
     // Actuator allocation
+    thrust_allocator_.UpdateThrustMatrix(guidance_.GuidanceMode());
     thrust_allocator_.CalculateActuatorReferences(controller_.ThrustReference(), dynamics_.Nu());
     thrust_allocator_.Step(dt, dynamics_.U());
 

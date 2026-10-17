@@ -68,7 +68,7 @@ private:
 class SimulatedRudder {
 public:
     // Simulated rudder dynamics
-    void Step(double dt);
+    void Step(double dt, double u_r);
 
     void SetAngleCommand(double delta_c);
 
@@ -78,16 +78,15 @@ public:
     const double& AngleRate() const { return delta_r_rate_; }
     const double& AngleCommand() const { return delta_c_; };
 
-    const arma::vec3& ThrustConfig() const { return thrust_config_; }
-    const arma::vec6& Tau() const;
-
     double ForceToCommand(double f, double u) const;
+    const arma::vec3& Force() const { return f_vec_; }
+    const arma::vec3& Position() const { return r_; } 
 
 private:
     // Things
     std::string_view name_ = "MyRudder";
-    double l_x_ = -33;       
-    arma::vec3 thrust_config_ = {0, 1, l_x_}; 
+    arma::vec3 r_ = {-33, 0, -5};
+    arma::vec3 f_vec_{};
     
     // Dynamics
     double time_constant_{2.0};
@@ -95,8 +94,8 @@ private:
     double delta_min_{common::deg2rad(-35)};
     
     // Force
-    double k_r_ = 7.7e3;
-    arma::vec6 tau_;
+    double k_drag_ = 2e3;
+    double k_lift_ = 7.7e3;
 
     // State
     double delta_r_{};           
@@ -106,8 +105,7 @@ private:
 
 class SimulatedTunnelThruster {
 public:
-    void Step(double dt);
-
+    void Step(double dt, double u_r);
     void SetRpmCommand(double n_c);
 
     const double& Rpm() const { return n_; }
@@ -116,25 +114,26 @@ public:
     const double& MaxRpm() const { return n_max_; }
     const double& MinRpm() const { return n_min_; }
 
-    const arma::vec3& ThrustConfig() const { return thrust_config_; }
-    const arma::vec6& Tau() const;
-
-    double ForceToCommand(double f) const;
+    double ForceToCommand(double f, double u_r) const;
+    const arma::vec3& Position() const { return r_; }
+    const arma::vec3& Force() const { return f_vec_; }
+    const arma::vec3& ForceDirection() const { return f_dir_; }
 
 private:
     // Things
     std::string_view name_ = "MyTunnelThruster";
-    double l_x_ = 30;
-    arma::vec3 thrust_config_ = {0, 1, l_x_};     
-
+    arma::vec3 r_{30, 0, 6};
+    arma::vec3 f_dir_ = {0, 1, 0};
+    arma::vec3 f_vec_{};
+    
     // Dynamics
     double time_constant_{2.0};
     double n_max_{1000};
     double n_min_{-1000};
-
-    // Force
-    double k_tt_ = 0.1;
-    arma::vec6 tau_;
+    
+    // Parameters
+    double k_tt_ = 0.1;     // Force coefficient
+    double k_ur_ = 1;       // Force reduction coefficient for u_r
 
     // Rpm state
     double n_{};

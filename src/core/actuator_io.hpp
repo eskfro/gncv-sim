@@ -60,7 +60,7 @@ private:
 class Rudder {
 public:
     // Simulated rudder dynamics
-    void Step(double dt) { rudder_.Step(dt); }
+    void Step(double dt, double u_r) { rudder_.Step(dt, u_r); }
 
     void UpdateTau(double u) { rudder_.UpdateTau(u); }
     void SetAngleCommand(double delta_c) { rudder_.SetAngleCommand(delta_c); }
@@ -69,10 +69,9 @@ public:
     const double& AngleRate() const { return rudder_.AngleRate(); }
     const double& AngleCommand() const { return rudder_.AngleCommand(); };
 
-    const arma::vec3& ThrustConfig() const { return rudder_.ThrustConfig(); }
-    const arma::vec6& Tau() const { return rudder_.Tau(); }
-
     double ForceToCommand(double f, double u) const { return rudder_.ForceToCommand(f, u); }
+    const arma::vec3& Force() const { return rudder_.Force(); }
+    const arma::vec3& Position() const { return rudder_.Position(); }
 
 private:
     actuators::SimulatedRudder rudder_{};
@@ -80,7 +79,7 @@ private:
 
 class TunnelThruster {
 public:
-    void Step(double dt) { tunnel_thruster_.Step(dt); }
+    void Step(double dt, double u_r) { tunnel_thruster_.Step(dt, u_r); }
 
     void SetRpmCommand(double n_c) { tunnel_thruster_.SetRpmCommand(n_c); }
 
@@ -90,10 +89,10 @@ public:
     const double& MaxRpm() const { return tunnel_thruster_.MaxRpm(); }
     const double& MinRpm() const { return tunnel_thruster_.MinRpm(); }
 
-    const arma::vec3& ThrustConfig() const { return tunnel_thruster_.ThrustConfig(); }
-    const arma::vec6& Tau() const { return tunnel_thruster_.Tau(); }
-
-    double ForceToCommand(double f) const { return tunnel_thruster_.ForceToCommand(f); }
+    double ForceToCommand(double f, double u_r) const { return tunnel_thruster_.ForceToCommand(f, u_r); }
+    const arma::vec3 Position() const { return tunnel_thruster_.Position(); }
+    const arma::vec3 Force() const { return tunnel_thruster_.Force(); }
+    const arma::vec3 ForceDirection() const { return tunnel_thruster_.ForceDirection(); }
 
 private:
     actuators::SimulatedTunnelThruster tunnel_thruster_{};

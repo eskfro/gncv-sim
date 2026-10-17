@@ -1,7 +1,9 @@
 #include <algorithm>
 #include <armadillo>
 #include <cmath>
+#include <cstdlib>
 #include <math.h>
+#include <string_view>
 #include <system_error>
 
 #include "core/common.hpp"
@@ -32,6 +34,10 @@ double ssa(double angle) {
     double wrapped = std::fmod(angle + M_PI, 2 * M_PI);
     if (wrapped < 0.0) wrapped += 2 * M_PI;
     return wrapped - M_PI;
+}
+
+double sign(double x) {
+    return (x > 0.0) - (x < 0.0); 
 }
 
 // First order lowpass dynamics step
@@ -344,6 +350,15 @@ double heaviside(double t, double t_step, double value) {
     } else {
         return value;
     }
+}
+
+void Panic(const std::string_view& s) {
+    PrintError(s);
+    std::abort();
+}
+
+void PrintError(const std::string_view& e) {
+    std::cout << ansi::red << e << ansi::reset << "\n";
 }
 
 } // namespace common
