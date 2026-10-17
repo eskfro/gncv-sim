@@ -23,27 +23,15 @@ void ThrustAllocator::Init() {
     
     // Compose thrust matrix T(a)
     int col = 0;
-    T_alpha_ = arma::mat(3, num_actuators_, arma::fill::zeros);
-    for (const auto r : rudders_) {
-        T_alpha_.col(col++) = r.ThrustConfig();
+    T_alpha_ = arma::mat(6, num_actuators_, arma::fill::zeros);
+    for (const auto& r : rudders_) {
+        T_alpha_.col(col++) = common::CalculateThrustVector(r.ForceDirection(), r.Position());
     }
     for (const auto mp : main_propulsors_) {
-        T_alpha_.col(col++) = mp.ThrustConfig();
+        T_alpha_.col(col++) = common::CalculateThrustVector(mp.ForceDirection(), mp.Position());
     }
     for (const auto tt : tunnel_thrusters_) {
-        T_alpha_.col(col++) = tt.ThrustConfig();
-    }
-}
-
-void ThrustAllocator::UpdateThrustMatrix(const common::GuidanceMode& guidance_mode) {
-    if (thrust_mode_ == common::ThrustMode::Transit) {
-        int col = 0;
-        T_alpha_ = arma::mat(3, )
-
-    } else if (thrust_mode_ == common::ThrustMode::DP) {
-
-    } else {
-        common::Panic("Could not update thrust matrix");
+        T_alpha_.col(col++) = common::CalculateThrustVector(tt.ForceDirection(), tt.Position());
     }
 }
 

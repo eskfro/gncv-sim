@@ -38,7 +38,7 @@ namespace actuators_io {
 
 class MainPropulsion {
 public:
-    void Step(double dt) { main_propulsor_.Step(dt); }
+    void Step(double dt, double u_r) { main_propulsor_.Step(dt, u_r); }
 
     void SetRpmCommand(double n_c) { main_propulsor_.SetRpmCommand(n_c); }
 
@@ -48,10 +48,10 @@ public:
     const double& MaxRpm() const { return main_propulsor_.MaxRpm(); }
     const double& MinRpm() const { return main_propulsor_.MinRpm(); }
 
-    const arma::vec3& ThrustConfig() const { return main_propulsor_.ThrustConfig(); }
-    const arma::vec6& Tau() const { return main_propulsor_.Tau(); }
-
     double ForceToCommand(double f) const { return main_propulsor_.ForceToCommand(f); }
+    const arma::vec3& Position() const { return main_propulsor_.Position(); } 
+    const arma::vec3& Force() const { return main_propulsor_.Force(); } 
+    const arma::vec3& ForceDirection() const { return main_propulsor_.ForceDirection(); } 
 
 private:
     actuators::SimulatedMainPropulsion main_propulsor_{};
@@ -62,7 +62,6 @@ public:
     // Simulated rudder dynamics
     void Step(double dt, double u_r) { rudder_.Step(dt, u_r); }
 
-    void UpdateTau(double u) { rudder_.UpdateTau(u); }
     void SetAngleCommand(double delta_c) { rudder_.SetAngleCommand(delta_c); }
 
     const double& Angle() const { return rudder_.Angle(); }
@@ -72,6 +71,7 @@ public:
     double ForceToCommand(double f, double u) const { return rudder_.ForceToCommand(f, u); }
     const arma::vec3& Force() const { return rudder_.Force(); }
     const arma::vec3& Position() const { return rudder_.Position(); }
+    const arma::vec3& ForceDirection() const { return rudder_.ForceDirection(); }
 
 private:
     actuators::SimulatedRudder rudder_{};

@@ -31,8 +31,7 @@ namespace actuators {
 
 class SimulatedMainPropulsion {
 public:
-    void Step(double dt);
-
+    void Step(double dt, double u_r);
     void SetRpmCommand(double n_c);
 
     const double& Rpm() const { return n_; }
@@ -41,15 +40,18 @@ public:
     const double& MaxRpm() const { return n_max_; }
     const double& MinRpm() const { return n_min_; }
 
-    const arma::vec3& ThrustConfig() const  { return thrust_config_; }
-    const arma::vec6& Tau() const;
-
     double ForceToCommand(double f) const;
+    const arma::vec3& Force() const { return f_vec_; };
+    const arma::vec3& Position() const { return r_; };
+    const arma::vec3& ForceDirection() const { return f_dir_; }
+
 
 private:
     // Things
     std::string_view name_ = "MyMainPropulsor";
-    arma::vec3 thrust_config_ = {1, 0, 0};
+    arma::vec3 r_ = {-40, 0, 5};
+    arma::vec3 f_dir_ = {1, 0, 0};
+    arma::vec3 f_vec_{};
 
     double time_constant_{2.0};
     double n_max_{220};
@@ -57,7 +59,6 @@ private:
 
     // Force
     double k_mp_ = 16.0;
-    arma::vec6 tau_{};
 
     // State
     double n_{};
@@ -72,8 +73,6 @@ public:
 
     void SetAngleCommand(double delta_c);
 
-    void UpdateTau(double u);
-
     const double& Angle() const { return delta_r_; }
     const double& AngleRate() const { return delta_r_rate_; }
     const double& AngleCommand() const { return delta_c_; };
@@ -81,11 +80,13 @@ public:
     double ForceToCommand(double f, double u) const;
     const arma::vec3& Force() const { return f_vec_; }
     const arma::vec3& Position() const { return r_; } 
+    const arma::vec3& ForceDirection() const { return f_dir_; }
 
 private:
     // Things
     std::string_view name_ = "MyRudder";
-    arma::vec3 r_ = {-33, 0, -5};
+    arma::vec3 r_ = {-33, 0, 5};
+    arma::vec3 f_dir_ = {0, 1, 0};
     arma::vec3 f_vec_{};
     
     // Dynamics

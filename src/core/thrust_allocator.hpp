@@ -16,7 +16,7 @@ public:
     void Step(double dt, double u);
     void Init();
 
-    void UpdateThrustMatrix(const common::GuidanceMode& guidance_mode);
+    void UpdateThrustMode(const common::GuidanceMode& guidance_mode);
     void CalculateActuatorReferences(const arma::vec3& thrust_vector, const arma::vec6& nu);
 
     // Getters
@@ -30,7 +30,7 @@ public:
 
 private:
     int num_actuators_{};        
-    arma::mat T_alpha_{};       // thrust matrix   :   tau = T(a) * f
+    arma::mat T_alpha_{};
     common::ActuatorCommands actuator_references_{};
     common::ActuatorCommands actuator_commands_{};
     common::ThrustMode thrust_mode_{}; 

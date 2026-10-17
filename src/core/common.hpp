@@ -39,6 +39,7 @@ using mat1512 = arma::Mat<double>::fixed<15, 12>;
 
 enum class GuidanceMode : uint8_t {HeadingHold, PositionHold, WaypointTracking};
 enum class ThrustMode : uint8_t {Transit, DP};
+enum class ThrustSolver : uint8_t {PseudoInverse, Optimization};
 
 struct Reference {
     GuidanceMode guidance_mode{};
@@ -105,6 +106,7 @@ quat quat_from_euler(const arma::vec3& a);
 arma::vec3 quat_to_euler(const quat& q);
 
 // Program helper
+arma::vec6 CalculateThrustVector(const arma::vec3& f, const arma::vec3& r);
 void PrintError(const std::string_view& e);
 void Panic(const std::string_view& s);
 

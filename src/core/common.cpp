@@ -361,4 +361,11 @@ void PrintError(const std::string_view& e) {
     std::cout << ansi::red << e << ansi::reset << "\n";
 }
 
+arma::vec6 CalculateThrustVector(const arma::vec3 &f, const arma::vec3 &r) {
+    arma::vec6 tau{};
+    tau.subvec(0, 2) = f;
+    tau.subvec(3, 5) = S(r) * f;
+    return tau;
+}
+
 } // namespace common
