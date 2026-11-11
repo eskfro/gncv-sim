@@ -38,14 +38,16 @@ void ThrustAllocator::Init() {
 // Set actuator_references from thrust_vector
 void ThrustAllocator::CalculateActuatorReferences(const arma::vec3& thrust_vector, const arma::vec6& nu) {
     // Solve T_alpha * f = thrust_vector
-    const arma::vec f = arma::pinv(T_alpha_) * thrust_vector;   // pseudo inverse (over actuated)
+    const arma::uvec dofs = {0, 1, 5};
+    const arma::mat T = T_alpha_.rows(dofs);
+    const arma::vec f = arma::pinv(T) * thrust_vector;   // pseudo inverse (over actuated)
     const double u = common::U(nu);
 
     // Distribute references
     int idx = 0;
     for (auto& r : rudders_)          actuator_references_.delta_r = r.ForceToCommand(f(idx++), u);
     for (auto& mp : main_propulsors_) actuator_references_.n_mp    = mp.ForceToCommand(f(idx++));
-    for (auto& tt : tunnel_thrusters_) actuator_references_.n_tt   = tt.ForceToCommand(f(idx++));
+    for (auto& tt : tunnel_thrusters_) actuator_references_.n_tt   = tt.ForceToCommand(f(idx++), u);
 }
 
 void ThrustAllocator::Step(double dt, double u) {
@@ -64,16 +66,15 @@ void ThrustAllocator::Step(double dt, double u) {
     // Actuator update
     for (auto& r : rudders_) {
         r.SetAngleCommand(actuator_commands_.delta_r);
-        r.Step(dt);
-        r.UpdateTau(u);
+        r.Step(dt, u);
     }
     for (auto& mp : main_propulsors_) {
         mp.SetRpmCommand(actuator_commands_.n_mp);
-        mp.Step(dt);
+        mp.Step(dt, u);
     }
     for (auto& tt : tunnel_thrusters_) {
         tt.SetRpmCommand(actuator_commands_.n_tt);
-        tt.Step(dt);
+        tt.Step(dt, u);
     }
 }
 
@@ -81,13 +82,13 @@ const arma::vec6 ThrustAllocator::Tau() const {
     arma::vec6 tau{};
     // Actuator update
     for (auto& r : rudders_) {
-        tau += r.Tau();
+        tau += common::CalculateThrustVector(r.Force(), r.Position());
     }
     for (auto& mp : main_propulsors_) {
-        tau += mp.Tau();
+        tau += common::CalculateThrustVector(mp.Force(), mp.Position());
     }
     for (auto& tt : tunnel_thrusters_) {
-        tau += tt.Tau();
+        tau += common::CalculateThrustVector(tt.Force(), tt.Position());
     }
     return tau;
 }
@@ -102,6 +103,15 @@ bool ThrustAllocator::AntiWindupU() const {
     }
     return false;
 
+}
+
+void ThrustAllocator::UpdateThrustMode(const common::GuidanceMode& guidance_mode) {
+    if (guidance_mode == common::GuidanceMode::HeadingHold) {
+        thrust_mode_ = common::ThrustMode::Transit;
+    } else {
+        // TODO: Finish this selection
+        thrust_mode_ = common::ThrustMode::DP;
+    }
 }
 
 } // namespace allocator
