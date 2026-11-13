@@ -12,13 +12,15 @@ class Guidance {
 public:     
     void Step(double dt);
 
-    const common::Reference& Reference() const { return reference_; }
+    const common::Desired& Desired() const { return desired_; }
     const common::GuidanceMode& GuidanceMode() const { return guidance_mode_; }
 
 private:
     double time_{};
+    common::HeadingReferenceModelParams ref_params_{};
     common::GuidanceMode guidance_mode_ = common::GuidanceMode::HeadingHold;
-    common::Reference reference_{};
+    common::Desired desired_{};
+    
 };
 
 } // namespace control

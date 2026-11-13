@@ -11,22 +11,23 @@ Output:
 
 namespace controller {
 
-void Controller::UpdateThrustReference(double dt, common::Reference reference, arma::vec6 eta, arma::vec6 nu) {
+void Controller::UpdateThrustReference(double dt, common::Desired desired, arma::vec6 eta, arma::vec6 nu) {
     const common::ControllerParams p = controller_params_;
     const double psi = eta(5);  // yaw
     const double u = nu(0);     // surge speed 
     const double r = nu(5);     // yaw rate
 
-    switch (reference.guidance_mode) {
+    switch (desired.guidance_mode) {
         
     case common::GuidanceMode::HeadingHold: {
 
         // PD heading control
-        psi_e_ = common::ssa(reference.psi_d - psi);
-        const double N = p.kp_psi * psi_e_ - p.kd_psi * r;
+        psi_e_ = common::ssa(desired.psi_d - psi);
+        r_e_ = (desired.r_d - r);
+        const double N = p.kp_psi * psi_e_ - p.kd_psi * r_e_;
 
         // P surge speed control
-        u_e_ = reference.u_d - u;
+        u_e_ = desired.u_d - u;
 
         if (!anti_windup_u_) {
             u_e_int_ += u_e_ * dt;

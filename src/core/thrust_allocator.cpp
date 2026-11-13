@@ -59,9 +59,9 @@ void ThrustAllocator::Step(double dt, double u) {
     // commands = H(s) * reference
     const common::ActuatorCommands ref = actuator_references_;
     const common::ActuatorCommands cmd = actuator_commands_;
-    actuator_commands_.delta_r += common::first_order_lowpass(dt, T_r, ref.delta_r, cmd.delta_r);
-    actuator_commands_.n_tt += common::first_order_lowpass(dt, T_tt, ref.n_tt, cmd.n_tt);
-    actuator_commands_.n_mp += common::first_order_lowpass(dt, T_mp, ref.n_mp, cmd.n_mp);
+    actuator_commands_.delta_r = common::first_order_lowpass(dt, T_r, ref.delta_r, cmd.delta_r);
+    actuator_commands_.n_tt = common::first_order_lowpass(dt, T_tt, ref.n_tt, cmd.n_tt);
+    actuator_commands_.n_mp = common::first_order_lowpass(dt, T_mp, ref.n_mp, cmd.n_mp);
 
     // Actuator update
     for (auto& r : rudders_) {

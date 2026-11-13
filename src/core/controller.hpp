@@ -30,7 +30,7 @@ Pivoit point, x_{ng}
 */
 class Controller {
 public:
-    void UpdateThrustReference(double dt, common::Reference reference, arma::vec6 eta, arma::vec6 nu);
+    void UpdateThrustReference(double dt, common::Desired reference, arma::vec6 eta, arma::vec6 nu);
     void SetAntiWindupFlags(bool anti_windup_u);
 
     const arma::vec3& ThrustReference() const { return thrust_reference_; }
@@ -42,6 +42,7 @@ private:
 
     // States
     double psi_e_{};
+    double r_e_{};
     double u_e_int_{};
     double u_e_{};
 

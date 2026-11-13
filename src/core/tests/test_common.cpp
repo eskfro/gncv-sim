@@ -21,7 +21,30 @@ int main() {
     if (!AlmostEqual(common::ssa(2.0 * arma::datum::pi), 0.0)) return 1;
     if (!AlmostEqual(common::ssa(1.5 * arma::datum::pi), -0.5 * arma::datum::pi)) return 1;
 
-    if (!AlmostEqual(common::first_order_lowpass(0.2, 2.0, 10.0, 6.0), 0.4)) return 1;
+    // First order lowpass (exact discretization)
+    {
+        // Single step against closed form: x1 = u + (x0 - u) * exp(-dt/T)
+        const double expected = 10.0 + (6.0 - 10.0) * std::exp(-0.2 / 2.0);
+        if (!AlmostEqual(common::first_order_lowpass(0.2, 2.0, 10.0, 6.0), expected)) return 1;
+
+        // Steady state: output stays at command
+        if (!AlmostEqual(common::first_order_lowpass(0.2, 2.0, 3.0, 3.0), 3.0)) return 1;
+
+        // After one time constant, 1 - exp(-1) (~63.2%) of the step is covered
+        if (!AlmostEqual(common::first_order_lowpass(2.0, 2.0, 1.0, 0.0), 1.0 - std::exp(-1.0))) return 1;
+
+        // Many steps match the continuous solution at t = N*dt (exact for constant input)
+        const double dt = 0.05, T = 0.7, u = -4.0, x0 = 2.5;
+        const int N = 200;
+        double x = x0;
+        for (int k = 0; k < N; ++k) x = common::first_order_lowpass(dt, T, u, x);
+        if (!AlmostEqual(x, u + (x0 - u) * std::exp(-N * dt / T), 1e-9)) return 1;
+
+        // Step size larger than the time constant: no overshoot, ends between curr and command
+        const double big = common::first_order_lowpass(10.0, 0.1, 5.0, 0.0);
+        if (!(big > 0.0 && big <= 5.0)) return 1;
+        if (!AlmostEqual(big, 5.0, 1e-12)) return 1;
+    }
 
     const arma::vec3 a{1.0, 2.0, 3.0};
     const arma::vec3 b{4.0, 5.0, 6.0};

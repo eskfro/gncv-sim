@@ -40,9 +40,40 @@ double sign(double x) {
     return (x > 0.0) - (x < 0.0); 
 }
 
-// First order lowpass dynamics step
+double sat(double x, double x_max) {
+    return std::clamp(x, -x_max, x_max);
+}
+
+// First order lowpass dynamics step: T * x_dot = u - x
+// Exact (zero-order hold) discretization, valid and non-overshooting for any dt > 0:
+//   x[k+1] = x[k] + (1 - exp(-dt/T)) * (u - x[k])
 double first_order_lowpass(double dt, double time_constant, double command, double curr) {
-    return (dt / time_constant) * (command - curr);
+    const double alpha = 1.0 - std::exp(-dt / time_constant);
+    return curr + alpha * (command - curr);
+}
+
+arma::vec3 heading_reference_model(double dt, double psi_r, const arma::vec3& x_d,
+    const common::HeadingReferenceModelParams& p) {
+
+    // x_d = (psi_d; r_d; a_d)
+    arma::vec3 x_d_dot{};
+
+    // Extract elements
+    const double psi_d = x_d(0); 
+    const double r_d = sat(x_d(1), p.r_max); 
+    const double a_d = sat(x_d(2), p.a_max);
+    const double z = p.zeta;
+    const double w = p.w;
+    const double w2 = std::pow(w, 2);
+    const double w3 = std::pow(w, 3);
+
+    x_d_dot(0) = r_d;
+    x_d_dot(1) = a_d;
+    x_d_dot(2) =    -(2*z + 1) * w * a_d  
+                    -(2*z + 1) * w2 * r_d
+                    + w3 * ssa(psi_r - psi_d); 
+
+    return x_d + x_d_dot * dt;
 }
 
 arma::mat66 join33blocks(arma::mat33 A, arma::mat33 B, arma::mat33 C, arma::mat33 D) {

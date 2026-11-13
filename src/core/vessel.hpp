@@ -81,7 +81,7 @@ private:
 
     // Modules
     guidance::Guidance guidance_{};
-    common::Reference reference_{};
+    common::Desired desired_{};
     controller::Controller controller_{};
     allocator::ThrustAllocator thrust_allocator_{};
 

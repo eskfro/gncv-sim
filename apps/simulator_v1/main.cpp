@@ -23,7 +23,7 @@ std::vector<double> snapshot_row(const common::VesselSnapshot& s);
 void simulator_v1_plotter(const std::filesystem::path& run_dir);
 
 // Simulation params
-static constexpr int kSimTimeSeconds = 240;
+static constexpr int kSimTimeSeconds = 500;
 static constexpr double dt = 0.025;
 static const int N = std::lround(kSimTimeSeconds / dt);
 

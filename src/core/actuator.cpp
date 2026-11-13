@@ -12,7 +12,7 @@ namespace actuators {
 
 void SimulatedMainPropulsion::Step(double dt, double u_r) {
     // Main propulsion dynamics
-    n_ += common::first_order_lowpass(dt, time_constant_, n_c_, n_);
+    n_ = common::first_order_lowpass(dt, time_constant_, n_c_, n_);
     
     // Force
     const double f_x = k_mp_ * n_ * std::abs(n_);
@@ -33,7 +33,7 @@ double SimulatedMainPropulsion::ForceToCommand(double f) const {
 void SimulatedRudder::Step(double dt, double u_r) {
     // Dynamics
     const double delta_r_prev = delta_r_;
-    delta_r_ += common::first_order_lowpass(dt, time_constant_, delta_c_, delta_r_);
+    delta_r_ = common::first_order_lowpass(dt, time_constant_, delta_c_, delta_r_);
     delta_r_rate_ = (delta_r_ - delta_r_prev) / dt;
 
     const double u2s = u_r * std::abs(u_r);
@@ -69,7 +69,7 @@ void SimulatedTunnelThruster::Step(double dt, double u_r) {
     const double u = std::abs(u_r);
     const double n_prev = n_;
     // Tunnel thruster dynamics
-    n_ += common::first_order_lowpass(dt, time_constant_, n_c_, n_);
+    n_ = common::first_order_lowpass(dt, time_constant_, n_c_, n_);
     n_rate_ = (n_ - n_prev) / dt;
 
     // Update force vector

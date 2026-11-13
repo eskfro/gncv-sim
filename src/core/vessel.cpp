@@ -25,11 +25,11 @@ void Vessel::Step(double dt) {
 
     // Guidance update
     guidance_.Step(dt);
-    reference_ = guidance_.Reference();
+    desired_ = guidance_.Desired();
     
     // Controller update
     controller_.SetAntiWindupFlags(thrust_allocator_.AntiWindupU());
-    controller_.UpdateThrustReference(dt, reference_, dynamics_.Eta(), dynamics_.Nu());
+    controller_.UpdateThrustReference(dt, desired_, dynamics_.Eta(), dynamics_.Nu());
 
     // Actuator allocation
     thrust_allocator_.UpdateThrustMode(guidance_.GuidanceMode());
@@ -52,7 +52,7 @@ common::VesselSnapshot Vessel::Snapshot() const {
     s.actuator_references = thrust_allocator_.ActuatorReferences();
     s.actuator_commands = thrust_allocator_.ActuatorCommands();
     s.actuator_states = actuator_states;
-    s.reference = guidance_.Reference();
+    s.reference = guidance_.Desired();
     s.t = dynamics_.Time();
     s.x = dynamics_.State();
     s.tau = dynamics_.Tau();

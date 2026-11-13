@@ -41,10 +41,12 @@ enum class GuidanceMode : uint8_t {HeadingHold, PositionHold, WaypointTracking};
 enum class ThrustMode : uint8_t {Transit, DP};
 enum class ThrustSolver : uint8_t {PseudoInverse, Optimization};
 
-struct Reference {
+struct Desired {
     GuidanceMode guidance_mode{};
     arma::vec6 eta_d{};
     double psi_d{};
+    double r_d{};
+    double a_d{};
     double u_d{};
 };
 
@@ -75,10 +77,17 @@ struct ImuParams {
 
 struct ControllerParams {
     double kp_psi = 6e6;
-    double kp_u = 6e5;
-    double ki_u = 4700;
-    double kd_psi = 6e7;
+    double kd_psi = 6e4;
+    double kp_u = 6e6;
+    double ki_u = 1e5;
 
+};
+
+struct HeadingReferenceModelParams {
+    double r_max = 10;
+    double a_max = 10;
+    double w = 0.03;
+    double zeta = 1;
 };
 
 struct VesselSnapshot {
@@ -86,7 +95,7 @@ struct VesselSnapshot {
     ActuatorCommands actuator_references;
     ActuatorCommands actuator_commands;
     ActuatorCommands actuator_states;
-    Reference reference;
+    Desired reference;
     vec12 x;
     arma::vec6 tau;
 };
@@ -95,6 +104,7 @@ struct VesselSnapshot {
 // q = (w, x, y, z) : unit quaternion, Hamilton convention (scalar first)
 // R_quat(q) rotates body -> ned, same direction as R_zyx
 // Reference: Sola, "Quaternion kinematics for the error-state Kalman filter"
+
 using quat = arma::vec4;
 
 quat quat_mult(const quat& q, const quat& p);
@@ -120,10 +130,12 @@ arma::mat44 join22blocks(arma::mat33 A, arma::mat33 B, arma::mat33 C, arma::mat3
 double U(const arma::vec6& nu);
 double heaviside(double t, double t_step, double value);
 double sign(double x);
+double sat(double x, double x_max);
 
 // Numerical solvers
 vec12 solver_12d_rk4(std::function<vec12(vec12, double)> f, vec12 x, double t, double dt);
 double first_order_lowpass(double dt, double time_constant, double command, double curr);
+arma::vec3 heading_reference_model(double dt, double psi_r, const arma::vec3& x_d, const common::HeadingReferenceModelParams& p);
 
 // Matrices
 arma::mat33 R_zyx(const arma::vec3& a);
