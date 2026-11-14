@@ -11,7 +11,7 @@ Output:
 namespace controller {
 
 void Controller::UpdateThrustReference(double dt, common::Desired desired, arma::vec6 eta, arma::vec6 nu) {
-    const common::ControllerParams p = controller_params_;
+    const config::ControllerParams p = controller_params_;
     const double psi = eta(5);  // yaw
     const double u = nu(0);     // surge speed 
     const double r = nu(5);     // yaw rate

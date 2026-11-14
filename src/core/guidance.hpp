@@ -2,6 +2,7 @@
 #pragma once
 
 #include "core/common.hpp"
+#include "core/config.hpp"
 
 namespace guidance {
 
@@ -17,7 +18,8 @@ public:
 
 private:
     double time_{};
-    common::HeadingReferenceModelParams ref_params_{};
+    config::HeadingReferenceModelParams psi_ref_params_{};
+    config::SurgeSpeedReferenceModelParams surge_ref_params_{};
     common::GuidanceMode guidance_mode_{};
     common::Desired desired_{};
     

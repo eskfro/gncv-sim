@@ -52,7 +52,7 @@ common::VesselSnapshot Vessel::Snapshot() const {
     s.actuator_references = thrust_allocator_.ActuatorReferences();
     s.actuator_commands = thrust_allocator_.ActuatorCommands();
     s.actuator_states = actuator_states;
-    s.reference = guidance_.Desired();
+    s.desired = guidance_.Desired();
     s.t = dynamics_.Time();
     s.x = dynamics_.State();
     s.tau = dynamics_.Tau();

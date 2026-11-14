@@ -6,12 +6,9 @@
 
 namespace guidance {
 
-// Move this to a config someday
-constexpr double T_psi_d = 50;
-constexpr double T_u_d = 40;  
-
 void Guidance::Step(double dt) {
     const double t = time_;
+    const double T_u_d = surge_ref_params_.T;
     
     switch (guidance_mode_) {
 
@@ -25,7 +22,7 @@ void Guidance::Step(double dt) {
         const double psi_ref = common::heaviside(t, 90, common::deg2rad(90));
 
         arma::vec3 x_d = {desired_.psi_d, desired_.r_d, desired_.a_d};
-        x_d = common::heading_reference_model(dt, psi_ref, x_d, ref_params_);
+        x_d = common::heading_reference_model(dt, psi_ref, x_d, psi_ref_params_);
         desired_.psi_d = x_d(0);
         desired_.r_d = x_d(1);
         desired_.a_d = x_d(2);

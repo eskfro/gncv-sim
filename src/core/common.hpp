@@ -11,6 +11,8 @@
 #include <functional>
 #include <string_view>
 
+#include "core/config.hpp"
+
 namespace ansi {
     inline constexpr std::string_view green = "\033[32m";
     inline constexpr std::string_view yellow = "\033[33m";
@@ -65,45 +67,12 @@ struct ImuSnapshot {
     double r;
 };
 
-struct ImuParams {
-    double sigma_a{};   // acceleration white noise standard deviation
-    double sigma_w{};   // gyro white noise standard deviation
-    double sigma_aw{};  // acceleration bias driving noise
-    double sigma_ww{};  // gyro bias driving noise
-    double p_a{};       // inverse time constant acceleration
-    double p_w{};       // inverse time constant gyro
-    arma::vec3 g = {0, 0, 9.81};    // apple vector
-};
-
-struct ControllerParams {
-    double kp_psi = 6e6;
-    double kd_psi = 6e4;
-    double ki_psi = 6e3;
-    double kp_u = 6e5;
-    double ki_u = 1e4;
-
-};
-
-struct HeadingReferenceModelParams {
-    double r_max = 10;
-    double a_max = 10;
-    double w = 0.03;
-    double zeta = 1;
-};
-
-// First order. u(s) = h(s) * ref(s) 
-struct ActuatorReferenceModelParams {
-    double T_r = 0.2;
-    double T_tt = 0.2;
-    double T_mp = 0.2;
-};
-
 struct VesselSnapshot {
     double t;
     ActuatorCommands actuator_references;
     ActuatorCommands actuator_commands;
     ActuatorCommands actuator_states;
-    Desired reference;
+    Desired desired;
     vec12 x;
     arma::vec6 tau;
 };
@@ -143,7 +112,7 @@ double sat(double x, double x_max);
 // Numerical solvers
 vec12 solver_12d_rk4(std::function<vec12(vec12, double)> f, vec12 x, double t, double dt);
 double first_order_lowpass(double dt, double time_constant, double command, double curr);
-arma::vec3 heading_reference_model(double dt, double psi_r, const arma::vec3& x_d, const common::HeadingReferenceModelParams& p);
+arma::vec3 heading_reference_model(double dt, double psi_r, const arma::vec3& x_d, const config::HeadingReferenceModelParams& p);
 
 // Matrices
 arma::mat33 R_zyx(const arma::vec3& a);

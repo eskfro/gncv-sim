@@ -24,7 +24,7 @@ namespace vessel {
 
 common::vec12 Dynamics::StateDot(const common::vec12& x, double t) const {
     const bool underwater = false; // help im under the water
-    const VesselParams p = vessel_params_;
+    const config::VesselParams p = vessel_params_;
     const arma::vec6 eta = x.subvec(0, 5);
     const arma::vec6 nu  = x.subvec(6, 11);
 
@@ -59,7 +59,7 @@ void Dynamics::Step(double dt) {
 }
 
 void Dynamics::Init(std::filesystem::path vessel_config) {
-    const VesselParams p = vessel_params_;
+    const config::VesselParams p = vessel_params_;
 
     // Compose init state
     eta_ = p.eta_0;
@@ -88,7 +88,7 @@ void Dynamics::Init(std::filesystem::path vessel_config) {
 
 // Update the state dependent matrices
 void Dynamics::UpdateDynamicMatrices() {
-    const VesselParams p = vessel_params_;
+    const config::VesselParams p = vessel_params_;
 
     J_ = common::J(eta_);
     C_rb_ = common::C_rb(p.m, I_co_, p.r_cg, nu_);

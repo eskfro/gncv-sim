@@ -50,7 +50,7 @@ private:
     arma::vec3 thrust_reference_{};
 
     // Params
-    common::ControllerParams controller_params_{};
+    config::ControllerParams controller_params_{};
 };
 
 } // namespace controller

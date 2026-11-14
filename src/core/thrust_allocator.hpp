@@ -46,7 +46,7 @@ private:
     common::ActuatorCommands actuator_references_{};
     common::ActuatorCommands actuator_commands_{};
     common::ThrustMode thrust_mode_{};
-    common::ActuatorReferenceModelParams ref_model_params_{};
+    config::ActuatorReferenceModelParams ref_model_params_{};
 
     // Actuators
     std::vector<actuators_io::Rudder> rudders_{};

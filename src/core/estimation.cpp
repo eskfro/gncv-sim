@@ -107,7 +107,7 @@ void Eskf15::Init() {
     P_ = arma::eye(15, 15);
 }
 
-void Eskf15::PredictStateFromImu(double dt, const arma::vec3& acc_meas, const arma::vec3& gyro_meas, const common::ImuParams& p) {
+void Eskf15::PredictStateFromImu(double dt, const arma::vec3& acc_meas, const arma::vec3& gyro_meas, const config::ImuParams& p) {
     /*
     Uses the latest acceleration and gyro measurements to move the best guess
     of the state forward and works out the new uncertainty.

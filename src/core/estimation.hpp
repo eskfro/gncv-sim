@@ -63,7 +63,7 @@ public:
     void Init();
     
     // This functions runs everytime a new IMU measurement arrives
-    void PredictStateFromImu(double dt, const arma::vec3& acc_meas, const arma::vec3& gyro_meas, const common::ImuParams& p);
+    void PredictStateFromImu(double dt, const arma::vec3& acc_meas, const arma::vec3& gyro_meas, const config::ImuParams& p);
     
     // This function runs everytime a position fix arrives, for example Gnss measurement
     void CorrectStateFromGnss(double dt, const arma::vec3& pos_meas, const arma::mat33& R_meas);

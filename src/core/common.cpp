@@ -11,7 +11,7 @@
 namespace common {
 
 double deg2rad(double deg) {
-    return M_PI * deg / 180.0;
+    return deg * M_PI / 180.0;
 }
 
 bool inrange(double value, double range_min, double range_max) {
@@ -53,7 +53,7 @@ double first_order_lowpass(double dt, double time_constant, double command, doub
 }
 
 arma::vec3 heading_reference_model(double dt, double psi_r, const arma::vec3& x_d,
-    const common::HeadingReferenceModelParams& p) {
+    const config::HeadingReferenceModelParams& p) {
 
     // x_d = (psi_d; r_d; a_d)
     arma::vec3 x_d_dot{};
@@ -225,9 +225,7 @@ arma::mat66 M_a(double m, double i_x, double i_y, double i_z) {
         {0,  0,  0,         0,      1.0*i_y,    0},
         {0,  0,  0,         0,      0,          0.8*i_z}
     };
-
 }
-
 
 // Corelois rigid body
 arma::mat66 C_rb(double m, const arma::mat33& I0, const arma::vec3& r_cg, const arma::vec6& nu) {
