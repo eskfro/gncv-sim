@@ -73,7 +73,7 @@ void Dynamics::Init(std::filesystem::path vessel_config) {
 
     // Compose M_rb
     M_rb_ = common::M_rb(p.m, I_co_, p.r_cg);
-    M_a_ = common::M_a(p.m, I_cg_(0,0), I_cg_(1,1), I_cg_(2,2));
+    M_a_ = common::M_a(p.added_mass_ratios, p.m, I_cg_(0,0), I_cg_(1,1), I_cg_(2,2));
     M_ = M_rb_ + M_a_;
 
     // Compose G 

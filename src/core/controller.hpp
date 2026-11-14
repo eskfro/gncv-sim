@@ -31,13 +31,14 @@ Pivoit point, x_{ng}
 class Controller {
 public:
     void UpdateThrustReference(double dt, common::Desired reference, arma::vec6 eta, arma::vec6 nu);
-    void SetAntiWindupFlags(bool anti_windup_u);
+    void SetAntiWindupFlags(bool anti_windup_u, bool rudder_saturated);
 
     const arma::vec3& ThrustReference() const { return thrust_reference_; }
 
 private:
     // Anti-windup flags
     bool anti_windup_u_{};
+    bool rudder_saturated_{};
 
     // States
     double psi_e_{};

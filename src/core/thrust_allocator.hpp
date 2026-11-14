@@ -34,6 +34,7 @@ public:
     // Getters
     const arma::vec6 Tau() const;
     bool AntiWindupU() const;
+    bool RudderSaturated() const;
     const common::ActuatorCommands& ActuatorCommands() const { return actuator_commands_; }
     const common::ActuatorCommands& ActuatorReferences() const { return actuator_references_; }
     double DeltaR() const { return rudders_.at(0).Angle(); }

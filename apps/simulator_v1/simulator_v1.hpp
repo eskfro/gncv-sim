@@ -2,11 +2,12 @@
 
 #include "simdata/run.hpp"
 #include "core/common.hpp"
+#include "core/config.hpp"
 
 // Simulation params
-static constexpr int kSimTimeSeconds = 500;
-static constexpr double dt = 0.025;
-static const int N = std::lround(kSimTimeSeconds / dt);
+static constexpr config::SimParams p{};
+
+static const int N = std::lround(p.sim_time / p.dt);
 
 // Folder in vessels/ with the models of the simulated vessel. Its size
 // matches vessel::VesselParams in src/dynamics.hpp.

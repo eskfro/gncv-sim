@@ -123,7 +123,7 @@ arma::mat66 G(double nabla, double A_wp, double gmt, double gml, double x_cf, ar
 arma::mat66 J(const arma::vec6& eta);
 arma::mat33 I_cg(double m, double r44, double r55, double r66);
 arma::mat66 M_rb(double m, const arma::mat33& I0, const arma::vec3& r_cg);
-arma::mat66 M_a(double m, double i_x, double i_y, double i_z);
+arma::mat66 M_a(const arma::vec6& added_mass_ratios, double m, double i_x, double i_y, double i_z);
 arma::mat66 C_rb(double m, const arma::mat33& I0, const arma::vec3& r_cg, const arma::vec6& nu);
 arma::vec6 g(double w, double b, const arma::vec3& r_cg, const arma::vec3& r_cb, const arma::vec6& eta);
 arma::mat66 D_n(const arma::vec6& coeffs, const arma::vec6& nu);

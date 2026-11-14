@@ -216,15 +216,9 @@ arma::mat66 M_rb(double m, const arma::mat33& I0, const arma::vec3& r_cg) {
     return join33blocks(M11, M12, M21, M22);
 }
 
-arma::mat66 M_a(double m, double i_x, double i_y, double i_z) {
-    return {
-        {0.1*m,  0,     0,  0, 0, 0},
-        {0,   0.8*m,    0,  0, 0, 0},
-        {0,  0,     1.0*m,  0, 0, 0},
-        {0,  0,  0,         0.3*i_x,0,          0},
-        {0,  0,  0,         0,      1.0*i_y,    0},
-        {0,  0,  0,         0,      0,          0.8*i_z}
-    };
+arma::mat66 M_a(const arma::vec6& added_mass_ratios, double m, double i_x, double i_y, double i_z) {
+    const arma::vec6 r = added_mass_ratios;
+    return arma::diagmat(arma::vec6{m*r(0), m*r(1), m*r(2), i_x*r(3), i_y*r(4), i_z*r(5)});
 }
 
 // Corelois rigid body

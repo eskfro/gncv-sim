@@ -25,6 +25,7 @@
 #include <cstdint>
 #include <string_view>
 
+#include "core/config.hpp"
 #include "core/common.hpp"
 
 namespace actuators {
@@ -37,30 +38,19 @@ public:
     const double& Rpm() const { return n_; }
     const double& RpmRate() const { return n_rate_; }
     const double& RpmCommand() const { return n_c_; }
-    const double& MaxRpm() const { return n_max_; }
-    const double& MinRpm() const { return n_min_; }
+    const double& MaxRpm() const { return p_.n_max; }
+    const double& MinRpm() const { return p_.n_min; }
 
     double ForceToCommand(double f) const;
     const arma::vec3& Force() const { return f_vec_; };
-    const arma::vec3& Position() const { return r_; };
-    const arma::vec3& ForceDirection() const { return f_dir_; }
-
+    const arma::vec3& Position() const { return p_.r; };
+    const arma::vec3& ForceDirection() const { return p_.f_dir; }
 
 private:
-    // Things
-    std::string_view name_ = "MyMainPropulsor";
-    arma::vec3 r_ = {-40, 0, 5};
-    arma::vec3 f_dir_ = {1, 0, 0};
-    arma::vec3 f_vec_{};
-
-    double time_constant_{2.0};
-    double n_max_{220};
-    double n_min_{-220};
-
-    // Force
-    double k_mp_ = 16.0;
-
+    config::MainPropulsorParams p_{};
+    
     // State
+    arma::vec3 f_vec_{};
     double n_{};
     double n_rate_{};
     double n_c_{};
@@ -74,31 +64,20 @@ public:
     void SetAngleCommand(double delta_c);
 
     const double& Angle() const { return delta_r_; }
+    const double& MaxAngle() const { return p_.delta_max; }
     const double& AngleRate() const { return delta_r_rate_; }
     const double& AngleCommand() const { return delta_c_; };
 
     double ForceToCommand(double f, double u) const;
     const arma::vec3& Force() const { return f_vec_; }
-    const arma::vec3& Position() const { return r_; } 
-    const arma::vec3& ForceDirection() const { return f_dir_; }
+    const arma::vec3& Position() const { return p_.r; } 
+    const arma::vec3& ForceDirection() const { return p_.f_dir; }
 
 private:
-    // Things
-    std::string_view name_ = "MyRudder";
-    arma::vec3 r_ = {-33, 0, 5};
-    arma::vec3 f_dir_ = {0, 1, 0};
-    arma::vec3 f_vec_{};
+    config::RudderParams p_{};
     
-    // Dynamics
-    double time_constant_{2.0};
-    double delta_max_{common::deg2rad(35)};
-    double delta_min_{common::deg2rad(-35)};
-    
-    // Force
-    double k_drag_ = 2e3;
-    double k_lift_ = 7.7e3;
-
     // State
+    arma::vec3 f_vec_{};
     double delta_r_{};           
     double delta_r_rate_{};
     double delta_c_{};
@@ -112,31 +91,19 @@ public:
     const double& Rpm() const { return n_; }
     const double& RpmRate() const { return n_rate_; }
     const double& RpmCommand() const { return n_c_; }
-    const double& MaxRpm() const { return n_max_; }
-    const double& MinRpm() const { return n_min_; }
+    const double& MaxRpm() const { return p_.n_max; }
+    const double& MinRpm() const { return p_.n_min; }
 
     double ForceToCommand(double f, double u_r) const;
-    const arma::vec3& Position() const { return r_; }
+    const arma::vec3& Position() const { return p_.r; }
     const arma::vec3& Force() const { return f_vec_; }
-    const arma::vec3& ForceDirection() const { return f_dir_; }
+    const arma::vec3& ForceDirection() const { return p_.f_dir; }
 
 private:
-    // Things
-    std::string_view name_ = "MyTunnelThruster";
-    arma::vec3 r_{30, 0, 6};
-    arma::vec3 f_dir_ = {0, 1, 0};
+    config::TunnelThrusterParams p_{};
+    
+    // State
     arma::vec3 f_vec_{};
-    
-    // Dynamics
-    double time_constant_{2.0};
-    double n_max_{1000};
-    double n_min_{-1000};
-    
-    // Parameters
-    double k_tt_ = 0.1;     // Force coefficient
-    double k_ur_ = 1;       // Force reduction coefficient for u_r
-
-    // Rpm state
     double n_{};
     double n_rate_{};
     double n_c_{};

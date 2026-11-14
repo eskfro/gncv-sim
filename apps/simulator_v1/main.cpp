@@ -30,7 +30,7 @@ int main() {
 
     std::cout << "Starting simulation\n";
     while (n < N && running) {
-        vessel.Step(dt);
+        vessel.Step(p.dt);
         snapshots.push_back(vessel.Snapshot());
         n++;
         print_every_ten_seconds(n);

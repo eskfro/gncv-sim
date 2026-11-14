@@ -9,9 +9,9 @@ std::filesystem::path write_run(const std::vector<common::VesselSnapshot>& snaps
     simdata::Metadata metadata;
     metadata.simulator = "simulator_v1";
     metadata.vessel = kVesselName;
-    metadata.dt = dt;
+    metadata.dt = p.dt;
     metadata.columns = kColumns;
-    metadata.parameters["sim_time"] = kSimTimeSeconds;
+    metadata.parameters["sim_time"] = p.sim_time;
     metadata.parameters["guidance_modes"] = kGuidanceModes;
 
     const std::filesystem::path simdata_dir = simdata::SimdataDir(simdata::FindProjectRoot());
@@ -44,7 +44,7 @@ std::vector<double> snapshot_row(const common::VesselSnapshot& s) {
 }
 
 void print_every_ten_seconds(int n) {
-    const int n10s = 10 * std::lround(1 / dt);
+    const int n10s = 10 * std::lround(1 / p.dt);
     if (n % n10s != 0) return;
     int time_seconds = 10 * n / n10s;
     std::cout << time_seconds << " ";

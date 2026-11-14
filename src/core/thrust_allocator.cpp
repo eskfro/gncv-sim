@@ -107,14 +107,21 @@ const arma::vec6 ThrustAllocator::Tau() const {
 
 // Ideally maybe calculate max thrust force in -x direction instead ...
 bool ThrustAllocator::AntiWindupU() const {
-    bool anti_windup_u{};
     for (const auto& mp : main_propulsors_) {
         if (common::closeto(mp.Rpm(), mp.MaxRpm())) {
             return true;
         }
     }
     return false;
+}
 
+bool ThrustAllocator::RudderSaturated() const {
+    for (const auto& r : rudders_) {
+        if (common::closeto(std::abs(r.Angle()), r.MaxAngle())) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void ThrustAllocator::UpdateThrustMode(const common::GuidanceMode& guidance_mode) {

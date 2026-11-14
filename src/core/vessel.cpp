@@ -28,7 +28,7 @@ void Vessel::Step(double dt) {
     desired_ = guidance_.Desired();
     
     // Controller update
-    controller_.SetAntiWindupFlags(thrust_allocator_.AntiWindupU());
+    controller_.SetAntiWindupFlags(thrust_allocator_.AntiWindupU(), thrust_allocator_.RudderSaturated());
     controller_.UpdateThrustReference(dt, desired_, dynamics_.Eta(), dynamics_.Nu());
 
     // Actuator allocation

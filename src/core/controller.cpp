@@ -23,16 +23,16 @@ void Controller::UpdateThrustReference(double dt, common::Desired desired, arma:
         // === PID heading control ===
 
         psi_e_ = common::ssa(desired.psi_d - psi);
-        psi_e_int_ += psi_e_ * dt;
+        if (!rudder_saturated_) psi_e_int_ += psi_e_ * dt;
         r_e_ = (desired.r_d - r);
+
         const double N = p.kp_psi * psi_e_ + p.ki_psi * psi_e_int_ + p.kd_psi * r_e_;
 
         // === PI surge speed control ===
 
         u_e_ = desired.u_d - u;
-        if (!anti_windup_u_) {
-            u_e_int_ += u_e_ * dt;
-        }
+        if (!anti_windup_u_) u_e_int_ += u_e_ * dt;
+
         const double X = p.kp_u * u_e_ + p.ki_u * u_e_int_;
 
         thrust_reference_ = {X, 0, N};
@@ -47,8 +47,10 @@ void Controller::UpdateThrustReference(double dt, common::Desired desired, arma:
     }
 }
 
-void Controller::SetAntiWindupFlags(bool anti_windup_u) {
+void Controller::SetAntiWindupFlags(bool anti_windup_u, bool rudder_saturated) {
     anti_windup_u_ = anti_windup_u;
+    rudder_saturated_ = rudder_saturated;
+    
 }
 
 } // namespace controller

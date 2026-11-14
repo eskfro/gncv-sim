@@ -65,6 +65,7 @@ public:
     void SetAngleCommand(double delta_c) { rudder_.SetAngleCommand(delta_c); }
 
     const double& Angle() const { return rudder_.Angle(); }
+    const double& MaxAngle() const { return rudder_.MaxAngle(); }
     const double& AngleRate() const { return rudder_.AngleRate(); }
     const double& AngleCommand() const { return rudder_.AngleCommand(); };
 
