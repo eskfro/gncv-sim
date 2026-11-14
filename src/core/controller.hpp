@@ -35,13 +35,13 @@ public:
 
     const arma::vec3& ThrustReference() const { return thrust_reference_; }
 
-
 private:
     // Anti-windup flags
     bool anti_windup_u_{};
 
     // States
     double psi_e_{};
+    double psi_e_int_{};
     double r_e_{};
     double u_e_int_{};
     double u_e_{};

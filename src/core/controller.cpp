@@ -1,4 +1,3 @@
-#pragma once
 /*
 Input:
     Reference from the guidance module
@@ -21,14 +20,16 @@ void Controller::UpdateThrustReference(double dt, common::Desired desired, arma:
         
     case common::GuidanceMode::HeadingHold: {
 
-        // PD heading control
+        // === PID heading control ===
+
         psi_e_ = common::ssa(desired.psi_d - psi);
+        psi_e_int_ += psi_e_ * dt;
         r_e_ = (desired.r_d - r);
-        const double N = p.kp_psi * psi_e_ - p.kd_psi * r_e_;
+        const double N = p.kp_psi * psi_e_ + p.ki_psi * psi_e_int_ + p.kd_psi * r_e_;
 
-        // P surge speed control
+        // === PI surge speed control ===
+
         u_e_ = desired.u_d - u;
-
         if (!anti_windup_u_) {
             u_e_int_ += u_e_ * dt;
         }

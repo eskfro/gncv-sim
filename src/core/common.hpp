@@ -78,8 +78,9 @@ struct ImuParams {
 struct ControllerParams {
     double kp_psi = 6e6;
     double kd_psi = 6e4;
-    double kp_u = 6e6;
-    double ki_u = 1e5;
+    double ki_psi = 6e3;
+    double kp_u = 6e5;
+    double ki_u = 1e4;
 
 };
 
@@ -88,6 +89,13 @@ struct HeadingReferenceModelParams {
     double a_max = 10;
     double w = 0.03;
     double zeta = 1;
+};
+
+// First order. u(s) = h(s) * ref(s) 
+struct ActuatorReferenceModelParams {
+    double T_r = 0.2;
+    double T_tt = 0.2;
+    double T_mp = 0.2;
 };
 
 struct VesselSnapshot {

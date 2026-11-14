@@ -90,10 +90,4 @@ private:
     sensor_io::Imu imu_{};
 };
 
-/*
-TODO
-
-Thrust matrix
-
-*/
 } // namespace vessel

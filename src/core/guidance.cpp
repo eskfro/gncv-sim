@@ -8,7 +8,7 @@ namespace guidance {
 
 // Move this to a config someday
 constexpr double T_psi_d = 50;
-constexpr double T_u_d = 20;  
+constexpr double T_u_d = 40;  
 
 void Guidance::Step(double dt) {
     const double t = time_;

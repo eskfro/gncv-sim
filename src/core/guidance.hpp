@@ -18,7 +18,7 @@ public:
 private:
     double time_{};
     common::HeadingReferenceModelParams ref_params_{};
-    common::GuidanceMode guidance_mode_ = common::GuidanceMode::HeadingHold;
+    common::GuidanceMode guidance_mode_{};
     common::Desired desired_{};
     
 };
